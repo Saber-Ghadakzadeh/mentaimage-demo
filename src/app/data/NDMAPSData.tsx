@@ -93,9 +93,9 @@ const save = (key: string, value: unknown) => { try { window.localStorage.setIte
 
 export function NDMAPSProvider({ children }: { children: React.ReactNode }) {
   const initialConsents = Object.fromEntries(seed.cases.map((item) => [item.id, item.consent.allowDeidentifiedResearchAndProductImprovement]));
-  const storageVersion = "ndmaps-qc2";
+  const storageVersion = "ndmaps-qc3";
   if (get("ndmaps-storage-version", "") !== storageVersion) {
-    ["ndmaps-messages", "ndmaps-consents", "ndmaps-inventory", "ndmaps-appointments"].forEach((key) => window.localStorage.removeItem(key));
+    ["ndmaps-messages", "ndmaps-consents", "ndmaps-inventory", "ndmaps-appointments", "pulsekey-monitoring-programs", "pulsekey-monitoring-responses"].forEach((key) => window.localStorage.removeItem(key));
     save("ndmaps-storage-version", storageVersion);
   }
   const [microCheckins, setMicroCheckins] = useState<MicroCheckin[]>(() => get("ndmaps-checkins", []));
