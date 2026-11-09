@@ -888,14 +888,6 @@ function LandingPage() {
             <span className="mt-7 flex items-center gap-2 text-sm font-bold text-[#123F52]">Choose demo account <ArrowRight className="size-4 transition group-hover:translate-x-1" /></span>
           </button>
           <button
-            onClick={() => setDemoRole("manufacturer")}
-            className="group col-span-full min-h-[180px] rounded-[30px] border border-[#123F52]/10 bg-[#EAF4FC] p-7 text-left shadow-[0_16px_50px_rgba(18,63,82,0.08)] transition hover:-translate-y-1 sm:grid sm:grid-cols-[auto_1fr_auto] sm:items-center sm:gap-6"
-          >
-            <div className="grid size-14 place-items-center rounded-2xl bg-[#9375CF] text-white"><BarChart3 className="size-6" /></div>
-            <div><p className="mt-5 text-xs font-bold uppercase tracking-[0.16em] text-[#6F51AD] sm:mt-0">Manufacturer</p><h2 className="font-display mt-1 text-2xl font-semibold text-[#123F52]">Noreva Naturals Intelligence</h2><p className="mt-2 text-sm text-[#607984]">Explore product outcomes, practitioner engagement, research insights and commercial performance.</p></div>
-            <ArrowRight className="mt-5 size-5 text-[#123F52] transition group-hover:translate-x-1 sm:mt-0" />
-          </button>
-          <button
             onClick={() => setDemoRole("practitioner")}
             className="group min-h-[330px] overflow-hidden rounded-[30px] bg-[#123F52] p-7 text-left text-white shadow-[0_22px_70px_rgba(18,63,82,0.18)] transition hover:-translate-y-1 hover:bg-[#174C60] focus:outline-none focus:ring-4 focus:ring-[#17A7A3]/20"
           >
