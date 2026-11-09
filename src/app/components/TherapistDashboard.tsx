@@ -182,7 +182,7 @@ export function TherapistDashboard({ onBackToCheckIn, onOpenNDMAPS, onOpenInvent
               Check-in Programs
             </button>
             {onOpenInventory && <button onClick={onOpenInventory} className="flex w-full items-center gap-3 rounded-xl px-4 py-3 text-sm text-white/65 transition hover:bg-white/8 hover:text-white"><ShoppingBag className="size-4" />Inventory &amp; Orders</button>}
-            {onOpenNDMAPS && <button onClick={onOpenNDMAPS} className="flex w-full items-center gap-3 rounded-xl px-4 py-3 text-sm text-white/65 transition hover:bg-white/8 hover:text-white"><BarChart3 className="size-4" />NDMAPS clinical hub</button>}
+            {onOpenNDMAPS && <button onClick={onOpenNDMAPS} className="flex w-full items-center gap-3 rounded-xl px-4 py-3 text-sm text-white/65 transition hover:bg-white/8 hover:text-white"><BarChart3 className="size-4" />PulseKey clinical hub</button>}
           </nav>
 
           <div className="mt-auto rounded-2xl border border-white/10 bg-white/8 p-4">
