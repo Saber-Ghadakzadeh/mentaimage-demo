@@ -75,13 +75,11 @@ function AppShell({
   children,
   onHome,
   onLanding,
-  onTherapist,
   compact = false,
 }: {
   children: React.ReactNode;
   onHome: () => void;
   onLanding?: () => void;
-  onTherapist: () => void;
   compact?: boolean;
 }) {
   return (
@@ -90,17 +88,9 @@ function AppShell({
       <div className="fixed -right-20 top-[30%] size-72 rounded-full border border-white/10" />
       <div className="fixed -right-10 top-[34%] size-56 rounded-full border border-white/10" />
       <div className="relative mx-auto max-w-[1440px] px-4 sm:px-7 lg:px-10">
-        <header className={`flex items-center justify-between ${compact ? "py-5" : "py-6 lg:py-8"}`}>
+        <header className={`flex items-center ${compact ? "py-5" : "py-6 lg:py-8"}`}>
           <button onClick={onLanding ?? onHome} title="Return to demo home" className="rounded-xl text-left focus:outline-none focus:ring-2 focus:ring-[#D9F06F]">
             <Brand />
-          </button>
-          <button
-            onClick={onTherapist}
-            className="flex items-center gap-2 rounded-full border border-white/15 bg-white/10 px-3.5 py-2.5 text-xs font-bold text-white/85 backdrop-blur-xl transition hover:bg-white/18 hover:text-white focus:outline-none focus:ring-2 focus:ring-[#D9F06F] sm:px-4 sm:text-sm"
-          >
-            <Stethoscope className="size-4" />
-            <span className="hidden sm:inline">Therapist portal</span>
-            <span className="sm:hidden">Therapist</span>
           </button>
         </header>
         {children}
@@ -112,16 +102,14 @@ function AppShell({
 function PatientHome({
   onStart,
   onDashboard,
-  onTherapist,
   onLanding,
 }: {
   onStart: () => void;
   onDashboard: () => void;
-  onTherapist: () => void;
   onLanding?: () => void;
 }) {
   return (
-    <AppShell onHome={() => undefined} onLanding={onLanding} onTherapist={onTherapist}>
+    <AppShell onHome={() => undefined} onLanding={onLanding}>
       <main className="grid min-h-[calc(100vh-104px)] items-center gap-8 pb-10">
         <section className="max-w-2xl py-4 lg:py-10">
           <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-[#D9F06F]/30 bg-[#D9F06F]/12 px-3 py-1.5 text-xs font-bold text-[#E8F79D]">
@@ -254,11 +242,9 @@ function DrawPad({ paths, setPaths }: { paths: string[]; setPaths: (paths: strin
 function CheckInFlow({
   onExit,
   onComplete,
-  onTherapist,
 }: {
   onExit: () => void;
   onComplete: () => void;
-  onTherapist: () => void;
 }) {
   const [step, setStep] = useState(0);
   const [text, setText] = useState("");
@@ -310,7 +296,7 @@ function CheckInFlow({
   ];
 
   return (
-    <AppShell onHome={onExit} onTherapist={onTherapist} compact>
+    <AppShell onHome={onExit} compact>
       <main className="mx-auto max-w-4xl pb-10 pt-2 sm:pt-5">
         <div className="mb-5 flex items-center justify-between">
           <button onClick={step === 0 ? onExit : () => setStep(step - 1)} className="flex items-center gap-2 text-sm font-semibold text-white/60 transition hover:text-white">
@@ -436,11 +422,9 @@ function CheckInFlow({
 function CompleteCheckInFlow({
   onExit,
   onComplete,
-  onTherapist,
 }: {
   onExit: () => void;
   onComplete: () => void;
-  onTherapist: () => void;
 }) {
   const [step, setStep] = useState(0);
   const [feelings, setFeelings] = useState<string[]>([]);
@@ -480,7 +464,7 @@ function CompleteCheckInFlow({
   const canContinue = step !== 0 || (feelings.length > 0 && (words.length >= 2 || (words.length === 1 && customWord.trim())));
 
   return (
-    <AppShell onHome={onExit} onTherapist={onTherapist} compact>
+    <AppShell onHome={onExit} compact>
       <main className="mx-auto max-w-4xl pb-28 pt-2">
         <div className="mb-5 flex items-center justify-between">
           <button onClick={step === 0 ? onExit : () => setStep(step - 1)} className="flex items-center gap-2 text-sm font-semibold text-white/65 hover:text-white"><ArrowLeft className="size-4" /> Back</button>
@@ -613,7 +597,6 @@ function PatientDashboard({
   onLanding,
   onStart,
   onBreathing,
-  onTherapist,
   onCare,
   onCareCheckin,
   patientCaseId,
@@ -624,7 +607,6 @@ function PatientDashboard({
   onLanding?: () => void;
   onStart: () => void;
   onBreathing: () => void;
-  onTherapist: () => void;
   onCare: () => void;
   onCareCheckin: () => void;
   patientCaseId: string;
@@ -636,7 +618,7 @@ function PatientDashboard({
   const liveProgress = [...patientProgress, ...sharedData.microCheckins.filter((item) => item.caseId === patientCaseId).slice(0,3).reverse().map((item) => ({ week: item.date.slice(5), wellbeing: item.sleepQuality0to10 * 10, energy: Math.max(0, 100 - item.anxietySeverity0to10 * 10) }))];
 
   return (
-    <AppShell onHome={onHome} onLanding={onLanding} onTherapist={onTherapist}>
+    <AppShell onHome={onHome} onLanding={onLanding}>
       <main className="pb-12 pt-3">
         {latestResult && (
           <motion.div initial={{ opacity: 0, y: -8 }} animate={{ opacity: 1, y: 0 }} className="mb-5 flex flex-col justify-between gap-4 rounded-2xl border border-[#D9F06F]/30 bg-[#D9F06F]/14 p-4 sm:flex-row sm:items-center">
@@ -788,7 +770,7 @@ function PatientDashboard({
   );
 }
 
-function BreathingExercise({ onBack, onTherapist }: { onBack: () => void; onTherapist: () => void }) {
+function BreathingExercise({ onBack }: { onBack: () => void }) {
   const phases = ["Breathe in", "Hold", "Breathe out", "Rest"];
   const [running, setRunning] = useState(false);
   const [phase, setPhase] = useState(0);
@@ -806,7 +788,7 @@ function BreathingExercise({ onBack, onTherapist }: { onBack: () => void; onTher
   }, [running]);
 
   return (
-    <AppShell onHome={onBack} onTherapist={onTherapist} compact>
+    <AppShell onHome={onBack} compact>
       <main className="grid min-h-[calc(100vh-85px)] place-items-center pb-10">
         <div className="w-full max-w-3xl text-center">
           <button onClick={onBack} className="mb-6 inline-flex items-center gap-2 text-sm font-semibold text-white/55 hover:text-white"><ArrowLeft className="size-4" /> Back to my progress</button>
@@ -981,16 +963,16 @@ function PatientExperience() {
     return withRoles(<Processing onDone={() => setView("patient-dashboard")} />);
   }
   if (view === "patient-dashboard") {
-    return withRoles(<PatientDashboard patientCaseId={patientCaseId} patientName={patientName} onHome={patientHome} onLanding={() => navigate("/")} onStart={() => setView("checkin")} onCareCheckin={() => setView("care-checkin")} onBreathing={() => setView("breathing")} onTherapist={therapist} onCare={() => setView("care")} latestResult={latestResult} />);
+    return withRoles(<PatientDashboard patientCaseId={patientCaseId} patientName={patientName} onHome={patientHome} onLanding={() => navigate("/")} onStart={() => setView("checkin")} onCareCheckin={() => setView("care-checkin")} onBreathing={() => setView("breathing")} onCare={() => setView("care")} latestResult={latestResult} />);
   }
   if (view === "breathing") {
-    return withRoles(<BreathingExercise onBack={() => setView("patient-dashboard")} onTherapist={therapist} />);
+    return withRoles(<BreathingExercise onBack={() => setView("patient-dashboard")} />);
   }
   if (view === "care") {
     if (patientCaseId !== "C-1001") return withRoles(<PersonalizedCareWorkspace caseId={patientCaseId} patientName={patientName} onBack={() => setView("patient-dashboard")} />);
     return withRoles(<PatientCare onBack={() => setView("patient-dashboard")} onPractitioner={() => navigate("/practitioner/ndmaps")} />);
   }
-  return withRoles(<PatientHome onStart={() => setView("checkin")} onDashboard={() => setView("patient-dashboard")} onTherapist={therapist} onLanding={() => navigate("/")} />);
+  return withRoles(<PatientHome onStart={() => setView("checkin")} onDashboard={() => setView("patient-dashboard")} onLanding={() => navigate("/")} />);
 }
 
 function PortalRoleSwitcher({ active, onPatient, onPractitioner, onManufacturer }: { active: "patient" | "practitioner"; onPatient: () => void; onPractitioner: () => void; onManufacturer: () => void }) {

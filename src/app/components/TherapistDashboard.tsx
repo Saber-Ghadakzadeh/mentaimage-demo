@@ -132,8 +132,7 @@ export function TherapistDashboard({ onBackToCheckIn, onOpenNDMAPS, onOpenInvent
         practiceMode={practiceMode}
         latestShared={latestShared}
         onBack={() => setWorkspace("today")}
-        onClientMode={onBackToCheckIn}
-      />
+             />
     );
   }
 
@@ -147,13 +146,12 @@ export function TherapistDashboard({ onBackToCheckIn, onOpenNDMAPS, onOpenInvent
         clients={clients}
         initialClient={selectedClient}
         onBack={() => setWorkspace("today")}
-        onClientMode={onBackToCheckIn}
-      />
+             />
     );
   }
 
   if (workspace === "followups") {
-    return <FollowUpWorkspace onBack={() => setWorkspace("today")} onClientMode={onBackToCheckIn} />;
+    return <FollowUpWorkspace onBack={() => setWorkspace("today")} />;
   }
 
   return (
@@ -218,14 +216,6 @@ export function TherapistDashboard({ onBackToCheckIn, onOpenNDMAPS, onOpenInvent
                 <button onClick={() => setPracticeMode("nd")} className={`rounded-lg px-3 py-2 text-xs font-bold ${practiceMode === "nd" ? "bg-white text-[#123F52]" : "text-white/55"}`}>ND practice</button>
                 <button onClick={() => setPracticeMode("therapy")} className={`rounded-lg px-3 py-2 text-xs font-bold ${practiceMode === "therapy" ? "bg-white text-[#123F52]" : "text-white/55"}`}>Therapy</button>
               </div>
-              <button
-                onClick={onBackToCheckIn}
-                className="flex items-center gap-2 rounded-xl border border-white/15 bg-white/10 px-3.5 py-2.5 text-sm font-semibold backdrop-blur-md transition hover:bg-white/16 focus:outline-none focus:ring-2 focus:ring-[#D9F06F]"
-              >
-                <ArrowLeft className="size-4" />
-                <span className="hidden sm:inline">Client view</span>
-                <span className="sm:hidden">Client</span>
-              </button>
             </div>
           </header>
 
@@ -446,12 +436,10 @@ function PractitionerPageHeader({
   title,
   eyebrow,
   onBack,
-  onClientMode,
 }: {
   title: string;
   eyebrow: string;
   onBack: () => void;
-  onClientMode: () => void;
 }) {
   return (
     <header className="mb-7 flex flex-col justify-between gap-4 border-b border-[#123F52]/10 pb-6 sm:flex-row sm:items-center">
@@ -464,12 +452,9 @@ function PractitionerPageHeader({
           <h1 className="font-display mt-1 text-3xl font-semibold tracking-tight text-[#123F52]">{title}</h1>
         </div>
       </div>
-      <div className="flex items-center gap-3">
-        <button onClick={() => navigate("/")} title="Return to demo home" className="hidden rounded-xl bg-white p-2 shadow-sm sm:block hover:ring-2 hover:ring-[#17A7A3]">
-          <ImageWithFallback src={officialLogo} alt="mentAImage official logo" className="h-7 w-auto object-contain" />
-        </button>
-        <button onClick={onClientMode} className="rounded-xl bg-[#123F52] px-4 py-2.5 text-sm font-bold text-white hover:bg-[#1B5265]">Switch to client</button>
-      </div>
+      <button onClick={() => navigate("/")} title="Return to demo home" className="hidden rounded-xl bg-white p-2 shadow-sm sm:block hover:ring-2 hover:ring-[#17A7A3]">
+        <ImageWithFallback src={officialLogo} alt="mentAImage official logo" className="h-7 w-auto object-contain" />
+      </button>
     </header>
   );
 }
@@ -479,7 +464,6 @@ function ClientWorkspace({
   practiceMode,
   latestShared,
   onBack,
-  onClientMode,
 }: {
   client: (typeof clients)[number];
   practiceMode: "nd" | "therapy";
@@ -494,7 +478,6 @@ function ClientWorkspace({
     reflections?: string[];
   } | null;
   onBack: () => void;
-  onClientMode: () => void;
 }) {
   const [tab, setTab] = useState("overview");
   const [evidenceOpen, setEvidenceOpen] = useState(false);
@@ -514,7 +497,7 @@ function ClientWorkspace({
     return (
       <div className="min-h-screen bg-[#F4F8F6] p-4 text-[#20343C] sm:p-7 lg:p-10">
         <div className="mx-auto max-w-5xl">
-          <PractitionerPageHeader title={`Prepare for ${displayName}'s next session`} eyebrow="AI-assisted draft · practitioner review required" onBack={() => setBriefOpen(false)} onClientMode={onClientMode} />
+          <PractitionerPageHeader title={`Prepare for ${displayName}'s next session`} eyebrow="AI-assisted draft · practitioner review required" onBack={() => setBriefOpen(false)} />
           <div className="grid gap-6 lg:grid-cols-[1fr_280px]">
             <article className="rounded-3xl border border-[#123F52]/10 bg-white p-6 shadow-sm sm:p-8">
               <div className="mb-6 flex items-center justify-between">
@@ -561,7 +544,7 @@ function ClientWorkspace({
   return (
     <div className="min-h-screen bg-[#F4F8F6] p-4 text-[#20343C] sm:p-7 lg:p-10">
       <div className="mx-auto max-w-[1400px]">
-        <PractitionerPageHeader title={displayName} eyebrow="Client workspace · fictional demo data" onBack={onBack} onClientMode={onClientMode} />
+        <PractitionerPageHeader title={displayName} eyebrow="Client workspace · fictional demo data" onBack={onBack} />
         <section className="mb-5 flex flex-col justify-between gap-5 rounded-3xl border border-[#123F52]/10 bg-white p-5 shadow-sm sm:flex-row sm:items-center sm:p-6">
           <div className="flex items-center gap-4">
             <div className="grid size-16 place-items-center rounded-full bg-[#D8F0E9] text-lg font-bold text-[#166F6C]">{client.initials}</div>
@@ -716,12 +699,10 @@ function ProgramsWorkspace({
   practiceMode,
   setPracticeMode,
   onBack,
-  onClientMode,
 }: {
   practiceMode: "nd" | "therapy";
   setPracticeMode: (mode: "nd" | "therapy") => void;
   onBack: () => void;
-  onClientMode: () => void;
 }) {
   const [frequency, setFrequency] = useState("Weekly");
   const [voice, setVoice] = useState(true);
@@ -730,7 +711,7 @@ function ProgramsWorkspace({
   return (
     <div className="min-h-screen bg-[#F4F8F6] p-4 text-[#20343C] sm:p-7 lg:p-10">
       <div className="mx-auto max-w-6xl">
-        <PractitionerPageHeader title="Check-in programs" eyebrow="Practice configuration" onBack={onBack} onClientMode={onClientMode} />
+        <PractitionerPageHeader title="Check-in programs" eyebrow="Practice configuration" onBack={onBack} />
         <div className="mb-6 flex w-fit rounded-xl border border-[#123F52]/10 bg-white p-1 shadow-sm"><button onClick={() => { setPracticeMode("nd"); setQuestion("How would you rate your digestive comfort?"); }} className={`rounded-lg px-4 py-2 text-sm font-bold ${!therapy ? "bg-[#123F52] text-white" : "text-[#657B82]"}`}>ND practice</button><button onClick={() => { setPracticeMode("therapy"); setQuestion("How manageable did stress feel this week?"); }} className={`rounded-lg px-4 py-2 text-sm font-bold ${therapy ? "bg-[#123F52] text-white" : "text-[#657B82]"}`}>Therapy practice</button></div>
         <div className="grid gap-6 lg:grid-cols-[1fr_0.8fr]">
           <section className="rounded-3xl border border-[#123F52]/10 bg-white p-6 shadow-sm">
@@ -760,12 +741,12 @@ function ProgramsWorkspace({
   );
 }
 
-function FollowUpWorkspace({ onBack, onClientMode }: { onBack: () => void; onClientMode: () => void }) {
+function FollowUpWorkspace({ onBack }: { onBack: () => void }) {
   const [status, setStatus] = useState<"review" | "preview" | "sent">("review");
   return (
     <div className="min-h-screen bg-[#F4F8F6] p-4 text-[#20343C] sm:p-7 lg:p-10">
       <div className="mx-auto max-w-5xl">
-        <PractitionerPageHeader title="Omar Lee · Follow-up" eyebrow="Practitioner-controlled workflow" onBack={onBack} onClientMode={onClientMode} />
+        <PractitionerPageHeader title="Omar Lee · Follow-up" eyebrow="Practitioner-controlled workflow" onBack={onBack} />
         <div className="grid gap-6 lg:grid-cols-[1fr_360px]">
           <article className="rounded-3xl border border-[#123F52]/10 bg-white p-6 shadow-sm sm:p-8">
             <div className="flex items-center gap-4"><div className="grid size-14 place-items-center rounded-full bg-[#EAF4FC] font-bold text-[#315C73]">OL</div><div><h2 className="font-display text-2xl font-semibold text-[#123F52]">Omar Lee</h2><p className="mt-1 text-sm text-[#6D8187]">Last visit 7 weeks ago · No appointment booked</p></div></div>
@@ -776,7 +757,7 @@ function FollowUpWorkspace({ onBack, onClientMode }: { onBack: () => void; onCli
             <p className="text-xs font-bold uppercase tracking-wider text-[#17A7A3]">Simulated reminder</p>
             {status === "review" && <><h3 className="font-display mt-3 text-2xl font-semibold text-[#123F52]">Prepare a follow-up note?</h3><p className="mt-3 text-sm leading-relaxed text-[#697E85]">You can preview and edit the message before approving it.</p><button onClick={() => setStatus("preview")} className="mt-6 w-full rounded-xl bg-[#123F52] py-3 text-sm font-bold text-white">Prepare reminder</button></>}
             {status === "preview" && <><textarea defaultValue="Hi Omar, it's been a little while since your last visit. If you'd like to review your progress and next steps, you can request a follow-up appointment." className="mt-4 min-h-[170px] w-full rounded-xl border border-[#123F52]/12 bg-[#F8FAF9] p-4 text-sm leading-relaxed outline-none" /><button onClick={() => setStatus("sent")} className="mt-4 flex w-full items-center justify-center gap-2 rounded-xl bg-[#17A7A3] py-3 text-sm font-bold text-white"><Send className="size-4" /> Approve & send simulation</button></>}
-            {status === "sent" && <div className="py-8 text-center"><div className="mx-auto grid size-14 place-items-center rounded-full bg-[#E7F7F1] text-[#147D79]"><CheckCircle2 className="size-6" /></div><h3 className="font-display mt-4 text-2xl font-semibold text-[#123F52]">Reminder approved</h3><p className="mt-2 text-sm text-[#6F8288]">Simulated as sent. Follow-up history has been updated.</p><button onClick={onClientMode} className="mt-6 text-sm font-bold text-[#147D79]">View client experience</button></div>}
+            {status === "sent" && <div className="py-8 text-center"><div className="mx-auto grid size-14 place-items-center rounded-full bg-[#E7F7F1] text-[#147D79]"><CheckCircle2 className="size-6" /></div><h3 className="font-display mt-4 text-2xl font-semibold text-[#123F52]">Reminder approved</h3><p className="mt-2 text-sm text-[#6F8288]">Simulated as sent. Follow-up history has been updated.</p></div>}
             <p className="mt-5 text-[11px] leading-relaxed text-[#87979B]">Prototype only. No message or appointment integration is active.</p>
           </aside>
         </div>

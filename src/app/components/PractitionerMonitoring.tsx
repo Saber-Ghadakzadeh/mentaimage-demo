@@ -77,7 +77,7 @@ export function ClientDirectory({ clients, onBack, onOpen }: { clients: Director
   </div></div>;
 }
 
-export function ProgramBuilder({ clients, initialClient, onBack, onClientMode }: { clients: DirectoryClient[]; initialClient: DirectoryClient; onBack: () => void; onClientMode: () => void }) {
+export function ProgramBuilder({ clients, initialClient, onBack }: { clients: DirectoryClient[]; initialClient: DirectoryClient; onBack: () => void }) {
   const data = useNDMAPS();
   const [patientId, setPatientId] = useState(initialClient.id);
   const patient = clients.find((client) => client.id === patientId) || clients[0];
@@ -104,7 +104,7 @@ export function ProgramBuilder({ clients, initialClient, onBack, onClientMode }:
   const dueTogether = nextDate ? nextDates.filter((item) => item.date?.toDateString() === nextDate.toDateString()).length : 0;
   const currentPreview = program.questions[preview] || null;
   return <div className="min-h-screen bg-[#F4F8F6] p-4 text-[#20343C] sm:p-7 lg:p-10"><div className="mx-auto max-w-[1400px]">
-    <header className="mb-6 flex flex-wrap items-center justify-between gap-4"><div className="flex items-center gap-4"><button onClick={onBack} className="grid size-10 place-items-center rounded-xl border bg-white"><ArrowLeft className="size-4" /></button><div><p className="text-[10px] font-bold uppercase tracking-[.17em] text-[#17A7A3]">Patient-specific configuration</p><h1 className="font-display text-3xl font-semibold text-[#123F52]">Check-in Program Builder</h1></div></div><button onClick={() => { window.localStorage.setItem("pulsekey-demo-case", patientId); onClientMode(); }} className="rounded-xl bg-[#123F52] px-4 py-2 text-xs font-bold text-white">Open {patient.name}&apos;s patient view</button></header>
+    <header className="mb-6 flex flex-wrap items-center justify-between gap-4"><div className="flex items-center gap-4"><button onClick={onBack} className="grid size-10 place-items-center rounded-xl border bg-white"><ArrowLeft className="size-4" /></button><div><p className="text-[10px] font-bold uppercase tracking-[.17em] text-[#17A7A3]">Patient-specific configuration</p><h1 className="font-display text-3xl font-semibold text-[#123F52]">Check-in Program Builder</h1></div></div></header>
     <section className="mb-5 grid gap-4 rounded-3xl border bg-white p-5 shadow-sm lg:grid-cols-[1fr_auto] lg:items-end"><label className="text-xs font-bold">Patient first<select value={patientId} onChange={(event) => setPatientId(event.target.value)} className="mt-2 h-11 w-full rounded-xl border bg-[#F8FAF9] px-3 text-sm">{clients.map((client) => <option key={client.id} value={client.id}>{client.name} · {client.id}</option>)}</select></label><div className="text-xs text-[#657B82]"><b className="text-[#123F52]">Monitoring Programs for {patient.name}</b><p className="mt-1">Priorities: {patient.programs.join(", ")} · {nextDate ? `Next scheduled ${nextDate.toLocaleDateString("en-CA",{weekday:"long",month:"long",day:"numeric"})} · ${dueTogether} questions due` : "No active schedule"}</p><div className="mt-3 flex gap-2"><button onClick={()=>applyTemplate("nd")} className="rounded-lg border px-3 py-2 text-[10px] font-bold">Start from ND Practice</button><button onClick={()=>applyTemplate("therapy")} className="rounded-lg border px-3 py-2 text-[10px] font-bold">Start from Therapy Practice</button></div></div></section>
     <div className="grid gap-6 xl:grid-cols-[1.1fr_.9fr]">
       <div className="space-y-5">
