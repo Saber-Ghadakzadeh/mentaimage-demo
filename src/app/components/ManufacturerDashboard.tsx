@@ -43,8 +43,8 @@ function exportExcel(filename: string, rows: AnyRecord[]) {
   URL.revokeObjectURL(url);
 }
 
-function Panel({ children, className = "" }: { children: React.ReactNode; className?: string }) {
-  return <section className={`border border-[#173f50]/10 bg-white shadow-[0_1px_2px_rgba(10,39,52,.03),0_14px_36px_rgba(10,39,52,.045)] ${className}`}>{children}</section>;
+function Panel({ children, className = "", onClick }: { children: React.ReactNode; className?: string; onClick?: () => void }) {
+  return <section className={`border border-[#173f50]/10 bg-white shadow-[0_1px_2px_rgba(10,39,52,.03),0_14px_36px_rgba(10,39,52,.045)] ${className}`} onClick={onClick}>{children}</section>;
 }
 
 function ChartTooltip({ active, payload, label }: any) {
