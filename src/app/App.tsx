@@ -911,7 +911,7 @@ function LandingPage() {
             <p className="mt-1 text-sm text-[#667D84]">Each patient has a different monitoring program assigned by their practitioner.</p>
             <div className="mt-4 space-y-2 max-h-[56vh] overflow-y-auto pr-1">
               {DEMO_PATIENTS.map((p) => (
-                <button key={p.id} onClick={() => { window.localStorage.setItem("pulsekey-demo-case", p.id); navigate("/client"); }}
+                <button key={p.id} onClick={() => { navigate(`/client?case=${p.id}`); }}
                   className="flex w-full items-center gap-4 rounded-2xl border border-[#17A7A3]/20 bg-[#EAF6F1] p-4 text-left transition hover:border-[#17A7A3] hover:bg-[#D5F0E8]">
                   <span className="grid size-10 shrink-0 place-items-center rounded-full bg-[#123F52] text-xs font-bold text-white">{p.initials}</span>
                   <span className="flex-1 min-w-0">
@@ -943,9 +943,15 @@ function LandingPage() {
 
 function PatientExperience() {
   const navigate = useNavigate();
-  const patientCaseId = window.localStorage.getItem("pulsekey-demo-case") || "C-1001";
+  const location = useLocation();
+  const patientCaseId = new URLSearchParams(location.search).get("case") || "C-1001";
   const patientName = DEMO_PATIENTS.find((p) => p.id === patientCaseId)?.name ?? "Alex Morgan";
   const [view, setView] = useState<AppView>("patient-dashboard");
+  const prevCaseRef = useRef(patientCaseId);
+  if (prevCaseRef.current !== patientCaseId) {
+    prevCaseRef.current = patientCaseId;
+    if (view !== "patient-dashboard") setView("patient-dashboard");
+  }
   const [deviceMode, setDeviceMode] = useState<"mobile" | "desktop">(() => {
     try { return window.localStorage.getItem("pulsekey-client-device-mode") === "desktop" ? "desktop" : "mobile"; }
     catch { return "mobile"; }
