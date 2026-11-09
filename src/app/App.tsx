@@ -821,11 +821,21 @@ function BreathingExercise({ onBack }: { onBack: () => void }) {
   );
 }
 
+const DEMO_PATIENTS: Array<{ id: string; name: string; initials: string; focus: string; program: string }> = [
+  { id: "C-1001",       name: "Alex Morgan",   initials: "AM", focus: "Sleep · week 6",                   program: "Sleep Monitoring" },
+  { id: "PK-PRIYA-01",  name: "Priya Shah",    initials: "PS", focus: "Sleep declining · visit in 2 days", program: "Sleep & Recovery Monitoring" },
+  { id: "PK-JORDAN-01", name: "Jordan Ellis",  initials: "JE", focus: "Energy & fatigue",                  program: "Energy & Fatigue Monitoring" },
+  { id: "PK-OMAR-01",   name: "Omar Lee",      initials: "OL", focus: "Sleep · follow-up overdue",         program: "Sleep Check-in" },
+  { id: "PK-SAM-01",    name: "Sam Rivera",    initials: "SR", focus: "Anxiety · work transitions",        program: "Anxiety Monitoring" },
+  { id: "PK-TAYLOR-01", name: "Taylor Brooks", initials: "TB", focus: "Mood · strong participation",       program: "Mood & Wellbeing Monitoring" },
+  { id: "PK-MORGAN-01", name: "Morgan Chen",   initials: "MC", focus: "Sleep + anxiety · busy workdays",   program: "Sleep & Anxiety Monitoring" },
+  { id: "PK-JAMIE-01",  name: "Jamie Laurent", initials: "JL", focus: "Mood & sleep",                      program: "Mood & Sleep Monitoring" },
+];
+
 function LandingPage() {
   const navigate = useNavigate();
   const [demoRole, setDemoRole] = useState<null | "client" | "practitioner" | "manufacturer">(null);
   const demos = {
-    client: ["Patient / Client", "Alex Morgan · Demonstration patient", "/client"],
     practitioner: ["Service Provider", "Dr. Avery Morgan · ND / Therapy demonstration", "/practitioner"],
     manufacturer: ["Manufacturer", "Noreva Naturals · Manufacturer Demo Account", "/manufacturer"],
   } as const;
@@ -893,7 +903,40 @@ function LandingPage() {
           </div>
         </section>
       </main>
-      {demoRole && <div className="fixed inset-0 z-[100] grid place-items-center bg-[#082D3D]/65 p-5 backdrop-blur-sm" onMouseDown={() => setDemoRole(null)}><div onMouseDown={(event) => event.stopPropagation()} className="w-full max-w-md rounded-[28px] bg-white p-6 shadow-2xl"><p className="text-xs font-bold uppercase tracking-[0.16em] text-[#17A7A3]">Simulated prototype sign-in</p><h2 className="font-display mt-2 text-3xl font-semibold text-[#123F52]">{demos[demoRole][0]}</h2><p className="mt-2 text-sm text-[#667D84]">This demonstration account does not represent production authentication.</p><button onClick={() => navigate(demos[demoRole][2])} className="mt-6 flex w-full items-center justify-between rounded-2xl border border-[#17A7A3]/25 bg-[#EAF6F1] p-4 text-left"><span><b className="text-sm text-[#123F52]">{demos[demoRole][1]}</b><small className="mt-1 block text-[#667D84]">Open connected demonstration workspace</small></span><ArrowRight className="size-5 text-[#168D88]" /></button><button onClick={() => setDemoRole(null)} className="mt-3 w-full py-2 text-xs font-bold text-[#71858B]">Back to roles</button></div></div>}
+      {demoRole === "client" && (
+        <div className="fixed inset-0 z-[100] grid place-items-center bg-[#082D3D]/65 p-5 backdrop-blur-sm" onMouseDown={() => setDemoRole(null)}>
+          <div onMouseDown={(e) => e.stopPropagation()} className="w-full max-w-lg rounded-[28px] bg-white p-6 shadow-2xl">
+            <p className="text-xs font-bold uppercase tracking-[0.16em] text-[#17A7A3]">Choose a demo patient</p>
+            <h2 className="font-display mt-2 text-2xl font-semibold text-[#123F52]">Patient / Client</h2>
+            <p className="mt-1 text-sm text-[#667D84]">Each patient has a different monitoring program assigned by their practitioner.</p>
+            <div className="mt-4 space-y-2 max-h-[56vh] overflow-y-auto pr-1">
+              {DEMO_PATIENTS.map((p) => (
+                <button key={p.id} onClick={() => { window.localStorage.setItem("pulsekey-demo-case", p.id); navigate("/client"); }}
+                  className="flex w-full items-center gap-4 rounded-2xl border border-[#17A7A3]/20 bg-[#EAF6F1] p-4 text-left transition hover:border-[#17A7A3] hover:bg-[#D5F0E8]">
+                  <span className="grid size-10 shrink-0 place-items-center rounded-full bg-[#123F52] text-xs font-bold text-white">{p.initials}</span>
+                  <span className="flex-1 min-w-0">
+                    <b className="block text-sm text-[#123F52]">{p.name}</b>
+                    <span className="block truncate text-[11px] text-[#667D84]">{p.focus} · <span className="text-[#17A7A3]">{p.program}</span></span>
+                  </span>
+                  <ArrowRight className="size-4 shrink-0 text-[#168D88]" />
+                </button>
+              ))}
+            </div>
+            <button onClick={() => setDemoRole(null)} className="mt-4 w-full py-2 text-xs font-bold text-[#71858B]">Back to roles</button>
+          </div>
+        </div>
+      )}
+      {(demoRole === "practitioner" || demoRole === "manufacturer") && (
+        <div className="fixed inset-0 z-[100] grid place-items-center bg-[#082D3D]/65 p-5 backdrop-blur-sm" onMouseDown={() => setDemoRole(null)}>
+          <div onMouseDown={(event) => event.stopPropagation()} className="w-full max-w-md rounded-[28px] bg-white p-6 shadow-2xl">
+            <p className="text-xs font-bold uppercase tracking-[0.16em] text-[#17A7A3]">Simulated prototype sign-in</p>
+            <h2 className="font-display mt-2 text-3xl font-semibold text-[#123F52]">{demos[demoRole][0]}</h2>
+            <p className="mt-2 text-sm text-[#667D84]">This demonstration account does not represent production authentication.</p>
+            <button onClick={() => navigate(demos[demoRole][2])} className="mt-6 flex w-full items-center justify-between rounded-2xl border border-[#17A7A3]/25 bg-[#EAF6F1] p-4 text-left"><span><b className="text-sm text-[#123F52]">{demos[demoRole][1]}</b><small className="mt-1 block text-[#667D84]">Open connected demonstration workspace</small></span><ArrowRight className="size-5 text-[#168D88]" /></button>
+            <button onClick={() => setDemoRole(null)} className="mt-3 w-full py-2 text-xs font-bold text-[#71858B]">Back to roles</button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
@@ -901,7 +944,7 @@ function LandingPage() {
 function PatientExperience() {
   const navigate = useNavigate();
   const patientCaseId = window.localStorage.getItem("pulsekey-demo-case") || "C-1001";
-  const patientName = patientCaseId === "PK-SAM-01" ? "Sam Rivera" : patientCaseId === "PK-MORGAN-01" ? "Morgan Chen" : "Alex Morgan";
+  const patientName = DEMO_PATIENTS.find((p) => p.id === patientCaseId)?.name ?? "Alex Morgan";
   const [view, setView] = useState<AppView>("patient-dashboard");
   const [deviceMode, setDeviceMode] = useState<"mobile" | "desktop">(() => {
     try { return window.localStorage.getItem("pulsekey-client-device-mode") === "desktop" ? "desktop" : "mobile"; }
