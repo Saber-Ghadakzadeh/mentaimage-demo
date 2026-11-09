@@ -834,6 +834,13 @@ const DEMO_PATIENTS: Array<{ id: string; name: string; initials: string; focus: 
 
 function LandingPage() {
   const navigate = useNavigate();
+  const location = useLocation();
+  useEffect(() => {
+    const role = new URLSearchParams(location.search).get("role");
+    if (role === "manufacturer") navigate("/manufacturer", { replace: true });
+    else if (role === "practitioner") navigate("/practitioner", { replace: true });
+    else if (role === "client") navigate("/client", { replace: true });
+  }, []);
   const [demoRole, setDemoRole] = useState<null | "client" | "practitioner" | "manufacturer">(null);
   const demos = {
     practitioner: ["Service Provider", "Dr. Avery Morgan · ND / Therapy demonstration", "/practitioner"],
