@@ -80,8 +80,6 @@ function Kpi({ label, value, note, trend = "up", icon: Icon, onClick, active }: 
   );
 }
 
-}
-
 function SelectFilter({ label, value, onChange, options }: { label: string; value: string; onChange: (value: string) => void; options: Array<[string, string]> }) {
   return (
     <label className="min-w-[155px] flex-1">
