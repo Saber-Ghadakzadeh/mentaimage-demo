@@ -184,7 +184,7 @@ export function ManufacturerDashboard({ onPatient, onPractitioner }: { onPatient
           {!collapsed && <div className="rounded-lg bg-white px-2.5 py-2"><ImageWithFallback src={officialLogo} alt="mentAImage" className="h-7 w-auto object-contain" /></div>}
           <button onClick={() => { setCollapsed(!collapsed); setMobileNav(false); }} className="grid size-9 place-items-center border border-white/10 text-white/65 hover:bg-white/10"><PanelLeftClose className={`size-4 transition ${collapsed ? "rotate-180" : ""}`} /></button>
         </div>
-        {!collapsed && <div className="px-5 pb-4 pt-5"><p className="text-[9px] font-bold uppercase tracking-[0.22em] text-[#7ADBD3]">Account · NFH / VITAZAN</p><p className="mt-1.5 font-display text-xl font-semibold">Manufacturer Intelligence</p><p className="mt-1 text-[10px] text-white/40">Role · Manufacturer Administrator</p></div>}
+        {!collapsed && <div className="px-5 pb-4 pt-5"><p className="text-[9px] font-bold uppercase tracking-[0.22em] text-[#7ADBD3]">Account · Noreva Naturals</p><p className="mt-0.5 text-[8px] text-white/35">Example manufacturer account · illustrative data</p><p className="mt-1.5 font-display text-xl font-semibold">Manufacturer Intelligence</p><p className="mt-1 text-[10px] text-white/40">Role · Manufacturer Administrator</p></div>}
         <nav className="mt-2 space-y-1 px-3">
           {nav.map(([id, label, Icon]) => (
             <button key={id} title={label} onClick={() => { setView(id); setMobileNav(false); }} className={`group flex h-11 w-full items-center gap-3 px-3 text-left text-xs transition ${view === id ? "bg-[#D9F06F] font-bold text-[#123F52]" : "text-white/62 hover:bg-white/7 hover:text-white"}`}>
@@ -194,8 +194,8 @@ export function ManufacturerDashboard({ onPatient, onPractitioner }: { onPatient
         </nav>
         <div className="mt-auto border-t border-white/10 p-3">
           {!collapsed && <div className="mb-3 bg-white/5 p-3"><p className="flex items-center gap-2 text-[10px] font-bold text-[#8CE1DA]"><ShieldCheck className="size-3.5" /> RESEARCH ACCESS</p><p className="mt-1 text-[10px] leading-relaxed text-white/42">De-identified, permissioned records only.</p></div>}
-          <button onClick={onPractitioner} className="flex h-9 w-full items-center gap-3 px-3 text-[11px] text-white/60 hover:bg-white/8 hover:text-white"><Users className="size-4" /><span className={collapsed ? "hidden" : ""}>ND / Practitioner portal</span></button>
-          <button onClick={onPatient} className="flex h-9 w-full items-center gap-3 px-3 text-[11px] text-white/60 hover:bg-white/8 hover:text-white"><Activity className="size-4" /><span className={collapsed ? "hidden" : ""}>Patient portal</span></button>
+
+
         </div>
       </div>
     </aside>
@@ -215,12 +215,12 @@ export function ManufacturerDashboard({ onPatient, onPractitioner }: { onPatient
             </div>
             <div className="ml-auto flex items-center gap-2">
               <div className="hidden border border-[#123F52]/10 bg-white p-1 md:flex">
-                <button onClick={onPatient} className="px-3 py-2 text-[10px] font-bold text-[#6C8086] hover:bg-[#EEF4F0]">Patient</button>
-                <button onClick={onPractitioner} className="px-3 py-2 text-[10px] font-bold text-[#6C8086] hover:bg-[#EEF4F0]">ND / Practitioner</button>
-                <span className="bg-[#123F52] px-3 py-2 text-[10px] font-bold text-white">NFH / VITAZAN</span>
+                
+                
+                <span className="bg-[#123F52] px-3 py-2 text-[10px] font-bold text-white">Noreva Naturals</span>
               </div>
               <button onClick={() => window.print()} title="Print report" className="grid size-10 place-items-center border border-[#123F52]/10 bg-white text-[#123F52] hover:bg-[#EAF5F1]"><FileDown className="size-4" /></button>
-              <div className="hidden bg-[#123F52] px-3 py-2 text-right sm:block"><p className="text-[9px] font-bold text-[#D9F06F]">NFH / VITAZAN</p><p className="text-[8px] text-white/60">Manufacturer Administrator</p></div>
+              <div className="hidden bg-[#123F52] px-3 py-2 text-right sm:block"><p className="text-[9px] font-bold text-[#D9F06F]">Noreva Naturals</p><p className="text-[8px] text-white/60">Manufacturer Administrator</p></div>
             </div>
           </header>
 

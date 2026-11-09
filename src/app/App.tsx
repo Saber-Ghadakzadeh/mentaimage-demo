@@ -839,7 +839,7 @@ function LandingPage() {
   const demos = {
     client: ["Patient / Client", "Alex Morgan · Demonstration patient", "/client"],
     practitioner: ["Service Provider", "Dr. Avery Morgan · ND / Therapy demonstration", "/practitioner"],
-    manufacturer: ["Manufacturer", "NFH / VITAZAN · Manufacturer Administrator", "/manufacturer"],
+    manufacturer: ["Manufacturer", "Noreva Naturals · Manufacturer Demo Account", "/manufacturer"],
   } as const;
 
   return (
@@ -887,7 +887,7 @@ function LandingPage() {
             className="group col-span-full min-h-[180px] rounded-[30px] border border-[#123F52]/10 bg-[#EAF4FC] p-7 text-left shadow-[0_16px_50px_rgba(18,63,82,0.08)] transition hover:-translate-y-1 sm:grid sm:grid-cols-[auto_1fr_auto] sm:items-center sm:gap-6"
           >
             <div className="grid size-14 place-items-center rounded-2xl bg-[#9375CF] text-white"><BarChart3 className="size-6" /></div>
-            <div><p className="mt-5 text-xs font-bold uppercase tracking-[0.16em] text-[#6F51AD] sm:mt-0">Manufacturer</p><h2 className="font-display mt-1 text-2xl font-semibold text-[#123F52]">NFH / VITAZAN Intelligence</h2><p className="mt-2 text-sm text-[#607984]">Explore product outcomes, practitioner engagement, research insights and commercial performance.</p></div>
+            <div><p className="mt-5 text-xs font-bold uppercase tracking-[0.16em] text-[#6F51AD] sm:mt-0">Manufacturer</p><h2 className="font-display mt-1 text-2xl font-semibold text-[#123F52]">Noreva Naturals Intelligence</h2><p className="mt-2 text-sm text-[#607984]">Explore product outcomes, practitioner engagement, research insights and commercial performance.</p></div>
             <ArrowRight className="mt-5 size-5 text-[#123F52] transition group-hover:translate-x-1 sm:mt-0" />
           </button>
           <button
@@ -953,7 +953,7 @@ function PatientExperience() {
       <div className={`mx-auto min-h-screen overflow-hidden shadow-[0_0_70px_rgba(8,45,61,.18)] transition-[max-width] duration-200 ${deviceMode === "mobile" ? "max-w-[480px]" : "max-w-[1480px]"}`}>
         {content}
       </div>
-      <PortalRoleSwitcher active="patient" onPatient={() => navigate("/client")} onPractitioner={() => navigate("/practitioner/ndmaps")} onManufacturer={() => navigate("/manufacturer")} />
+
     </div>
   );
   if (view === "checkin") {
@@ -991,7 +991,7 @@ function PortalRoleSwitcher({ active, onPatient, onPractitioner, onManufacturer 
   const items = [
     ["patient", "Patient", onPatient],
     ["practitioner", "ND / Practitioner", onPractitioner],
-    ["manufacturer", "NFH / VITAZAN", onManufacturer],
+    ["manufacturer", "Noreva Naturals", onManufacturer],
   ] as const;
   return <div className="fixed bottom-3 left-1/2 z-[90] flex -translate-x-1/2 gap-1 border border-white/15 bg-[#092F40]/95 p-1 shadow-2xl backdrop-blur-xl print:hidden">{items.map(([id, label, action]) => <button key={id} onClick={action} className={`whitespace-nowrap px-3 py-2 text-[10px] font-bold transition sm:px-4 ${active === id ? "bg-[#D9F06F] text-[#123F52]" : "text-white/68 hover:bg-white/10 hover:text-white"}`}>{label}</button>)}</div>;
 }
@@ -999,14 +999,14 @@ function PortalRoleSwitcher({ active, onPatient, onPractitioner, onManufacturer 
 function PractitionerExperience() {
   const navigate = useNavigate();
   const location = useLocation();
-  const switcher = <PortalRoleSwitcher active="practitioner" onPatient={() => navigate("/client")} onPractitioner={() => navigate("/practitioner/ndmaps")} onManufacturer={() => navigate("/manufacturer")} />;
-  if (location.pathname.includes("/ndmaps") || location.pathname.includes("/inventory")) return <><NDHub initialTab={location.pathname.includes("/inventory") ? "inventory" : "today"} onBack={() => navigate("/practitioner")} onClient={() => navigate("/client")} onManufacturer={() => navigate("/manufacturer")} />{switcher}</>;
-  return <><TherapistDashboard onBackToCheckIn={() => navigate("/client")} onOpenNDMAPS={() => navigate("/practitioner/ndmaps")} onOpenInventory={() => navigate("/practitioner/inventory")} />{switcher}</>;
+  
+  if (location.pathname.includes("/ndmaps") || location.pathname.includes("/inventory")) return <NDHub initialTab={location.pathname.includes("/inventory") ? "inventory" : "today"} onBack={() => navigate("/practitioner")} onClient={() => navigate("/client")} onManufacturer={() => undefined} />;
+  return <TherapistDashboard onBackToCheckIn={() => navigate("/")} onOpenNDMAPS={() => navigate("/practitioner/ndmaps")} onOpenInventory={() => navigate("/practitioner/inventory")} />;
 }
 
 function ManufacturerExperience() {
   const navigate = useNavigate();
-  return <ManufacturerDashboard onPatient={() => navigate("/client")} onPractitioner={() => navigate("/practitioner/ndmaps")} />;
+  return <ManufacturerDashboard onPatient={() => navigate("/")} onPractitioner={() => navigate("/")} />;
 }
 
 const router = createBrowserRouter([
