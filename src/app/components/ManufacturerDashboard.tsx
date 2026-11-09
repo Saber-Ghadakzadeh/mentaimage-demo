@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import React, { useMemo, useState } from "react";
 import {
   Activity, ArrowDownRight, ArrowUpRight, BarChart3, BrainCircuit, Building2,
   CalendarDays, CheckCircle2, ChevronRight, CircleDollarSign, ClipboardList,
@@ -20,7 +20,7 @@ type AnyRecord = Record<string, any>;
 const nav: Array<[View, string, typeof LayoutDashboard]> = [
   ["overview", "Executive overview", LayoutDashboard],
   ["outcomes", "Product outcomes", Activity],
-  ["cases", "NDMAPS case explorer", ClipboardList],
+  ["cases", "Patient Outcome Intelligence", ClipboardList],
   ["network", "Network, orders & sales", Building2],
   ["strategy", "Strategy & research", FlaskConical],
   ["monai", "Ask Monai", BrainCircuit],
@@ -62,20 +62,24 @@ function CompletionTooltip({ active, payload, week }: any) {
   return <div className="max-w-[280px] border border-white/10 bg-[#0B2D3B] p-3 text-xs text-white shadow-2xl"><p className="font-bold text-[#D9F06F]">{row.name} · {row.brand}</p><p className="mt-2 text-white/75">{row.Completed} of {row.Eligible} eligible patients completed their week-{week} check-in ({row["Completion %"]}%).</p></div>;
 }
 
-function Kpi({ label, value, note, trend = "up", icon: Icon }: { label: string; value: string | number; note: string; trend?: "up" | "down" | "neutral"; icon: any }) {
+function Kpi({ label, value, note, trend = "up", icon: Icon, onClick, active }: { label: string; value: string | number; note: string; trend?: "up" | "down" | "neutral"; icon: any; onClick?: () => void; active?: boolean }) {
+  const borderCls = active ? "border-2 border-[#19A7A2] bg-[#EAF6F4]" : "hover:border-[#19A7A2]/30";
   return (
-    <Panel className="group min-w-0 p-4 transition hover:-translate-y-0.5 hover:border-[#19A7A2]/30 sm:p-5">
+    <Panel className={"group min-w-0 p-4 transition hover:-translate-y-0.5 sm:p-5 " + borderCls + (onClick ? " cursor-pointer" : "")} onClick={onClick}>
       <div className="flex items-start justify-between gap-2">
         <p className="max-w-[150px] text-[10px] font-bold uppercase leading-4 tracking-[0.12em] text-[#6B7F86]">{label}</p>
-        <span className="grid size-8 shrink-0 place-items-center bg-[#EAF5F1] text-[#168D88]"><Icon className="size-4" /></span>
+        <span className={"grid size-8 shrink-0 place-items-center " + (active ? "bg-[#19A7A2] text-white" : "bg-[#EAF5F1] text-[#168D88]")}><Icon className="size-4" /></span>
       </div>
       <p className="mt-4 font-display text-3xl font-semibold leading-none tracking-tight text-[#123F52]">{value}</p>
-      <p className={`mt-3 flex items-center gap-1 text-[11px] font-semibold ${trend === "down" ? "text-[#B45C51]" : trend === "neutral" ? "text-[#6B7F86]" : "text-[#17877F]"}`}>
+      <p className={"mt-3 flex items-center gap-1 text-[11px] font-semibold " + (trend === "down" ? "text-[#B45C51]" : trend === "neutral" ? "text-[#6B7F86]" : "text-[#17877F]")}>
         {trend === "down" ? <ArrowDownRight className="size-3.5" /> : trend === "up" ? <ArrowUpRight className="size-3.5" /> : <span className="size-1.5 bg-[#8BA09F]" />}
         {note}
       </p>
+      {onClick && <p className="mt-2 text-[9px] font-bold uppercase tracking-wider text-[#19A7A2] opacity-0 transition group-hover:opacity-100">View detail →</p>}
     </Panel>
   );
+}
+
 }
 
 function SelectFilter({ label, value, onChange, options }: { label: string; value: string; onChange: (value: string) => void; options: Array<[string, string]> }) {
@@ -281,24 +285,181 @@ function Overview({ cases, checkins, orders, activeProducts, completion, complet
   const adverse = checkins.filter((item: AnyRecord) => item.newOrWorsenedSymptoms).length;
   const discontinued = cases.filter((item: AnyRecord) => item.outcomeCategory === "discontinued").length;
   const retention = percent(new Set(orders.map((item: AnyRecord) => item.practitionerId)).size, practitioners || 1);
+  const [drill, setDrill] = React.useState<string | null>(null);
+  const toggleDrill = (key: string) => setDrill(prev => prev === key ? null : key);
+
+  const adherenceByWeek = React.useMemo(() => {
+    const weeks: Record<number, { yes: number; partial: number; no: number }> = {};
+    checkins.forEach((item: AnyRecord) => {
+      const w = item.week;
+      weeks[w] = weeks[w] || { yes: 0, partial: 0, no: 0 };
+      if (item.planAdherence === "yes") weeks[w].yes++;
+      else if (item.planAdherence === "partial") weeks[w].partial++;
+      else if (item.planAdherence === "no") weeks[w].no++;
+    });
+    return Object.entries(weeks).sort(([a],[b]) => Number(a)-Number(b)).map(([week, v]) => ({ week: `W${week}`, ...v }));
+  }, [checkins]);
+
+  const concernBreakdown = React.useMemo(() => {
+    const map: Record<string, number> = {};
+    cases.forEach((item: AnyRecord) => {
+      (item.concerns || []).forEach((concern: string) => { map[concern] = (map[concern] || 0) + 1; });
+    });
+    return Object.entries(map).map(([name, value]) => ({ name, value })).sort((a,b) => b.value - a.value);
+  }, [cases]);
+
+  const aeByProduct = React.useMemo(() => {
+    return checkins.filter((item: AnyRecord) => item.newOrWorsenedSymptoms).reduce((acc: AnyRecord[], item: AnyRecord) => {
+      const caseRecord = cases.find((c: AnyRecord) => c.id === item.caseId);
+      const productId = caseRecord?.primaryProductId || "unknown";
+      const existing = acc.find((a: AnyRecord) => a.productId === productId);
+      if (existing) existing.count++;
+      else acc.push({ productId, count: 1 });
+      return acc;
+    }, []);
+  }, [checkins, cases]);
+
+  const ordersByMonth = React.useMemo(() => {
+    const map: Record<string, { month: string; count: number; value: number }> = {};
+    orders.forEach((o: AnyRecord) => {
+      const m = o.date?.slice(0, 7) || "unknown";
+      map[m] = map[m] || { month: m, count: 0, value: 0 };
+      map[m].count++;
+      map[m].value += o.totalCAD || 0;
+    });
+    return Object.values(map).sort((a,b) => a.month.localeCompare(b.month));
+  }, [orders]);
+
+  const practitionerActivity = React.useMemo(() => {
+    return [...new Set(cases.map((c: AnyRecord) => c.practitionerId))].map((id: any) => ({
+      id,
+      cases: cases.filter((c: AnyRecord) => c.practitionerId === id).length,
+      checkins: checkins.filter((ch: AnyRecord) => cases.find((c: AnyRecord) => c.id === ch.caseId && c.practitionerId === id)).length,
+      orders: orders.filter((o: AnyRecord) => o.practitionerId === id).length,
+    })).sort((a: AnyRecord, b: AnyRecord) => b.checkins - a.checkins);
+  }, [cases, checkins, orders]);
+
   return (
     <div className="space-y-5">
       <div className="grid grid-cols-2 gap-3 lg:grid-cols-5">
-        <Kpi label="Participating practitioners" value={practitioners} note="12 in network" icon={Users} />
-        <Kpi label="Enrolled / monitored" value={`${cases.length} / 135`} note="Permissioned research view" trend="neutral" icon={ShieldCheck} />
-        <Kpi label="Active products" value={activeProducts} note={`${discontinued} discontinuations`} trend={discontinued ? "down" : "neutral"} icon={Package} />
-        <Kpi label={`Week-${period} patient check-ins`} value={completion} note="Completed / all eligible cases" icon={CheckCircle2} />
-        <Kpi label="Reviewed NDMAPS reports" value={completedReports} note="Separate from patient completion" icon={FileText} />
-        <Kpi label="Practitioner engagement" value={retention} note="Ordered in period" icon={TrendingUp} />
-        <Kpi label="Direct manufacturer orders" value={orders.length} note="Across linked accounts" icon={ShoppingCart} />
-        <Kpi label="Total order value" value={money(totalOrders)} note="Fictional wholesale CAD" icon={CircleDollarSign} />
-        <Kpi label="Purchasing frequency" value={`${(orders.length / Math.max(practitioners, 1)).toFixed(1)}×`} note="Orders per active ND" icon={BarChart3} />
-        <Kpi label="Administration changes" value={changed} note={`${adverse} possible AE reports`} trend={adverse ? "down" : "neutral"} icon={TriangleAlert} />
+        <Kpi label="Participating practitioners" value={practitioners} note="12 in network" icon={Users} onClick={() => toggleDrill("practitioners")} active={drill === "practitioners"} />
+        <Kpi label="Enrolled / monitored" value={`${cases.length} / 135`} note="Permissioned research view" trend="neutral" icon={ShieldCheck} onClick={() => toggleDrill("enrolled")} active={drill === "enrolled"} />
+        <Kpi label="Active products" value={activeProducts} note={`${discontinued} discontinuations`} trend={discontinued ? "down" : "neutral"} icon={Package} onClick={() => toggleDrill("products")} active={drill === "products"} />
+        <Kpi label={`Week-${period} patient check-ins`} value={completion} note="Completed / all eligible cases" icon={CheckCircle2} onClick={() => toggleDrill("checkins")} active={drill === "checkins"} />
+        <Kpi label="Reviewed patient reports" value={completedReports} note="Clinician-reviewed longitudinal records" icon={FileText} onClick={() => toggleDrill("reports")} active={drill === "reports"} />
+        <Kpi label="Practitioner engagement" value={retention} note="Ordered in period" icon={TrendingUp} onClick={() => toggleDrill("engagement")} active={drill === "engagement"} />
+        <Kpi label="Direct manufacturer orders" value={orders.length} note="Across linked accounts" icon={ShoppingCart} onClick={() => toggleDrill("orders")} active={drill === "orders"} />
+        <Kpi label="Total order value" value={money(totalOrders)} note="Fictional wholesale CAD" icon={CircleDollarSign} onClick={() => toggleDrill("revenue")} active={drill === "revenue"} />
+        <Kpi label="Purchasing frequency" value={`${(orders.length / Math.max(practitioners, 1)).toFixed(1)}x`} note="Orders per active ND" icon={BarChart3} onClick={() => toggleDrill("frequency")} active={drill === "frequency"} />
+        <Kpi label="Administration changes" value={changed} note={`${adverse} possible AE reports`} trend={adverse ? "down" : "neutral"} icon={TriangleAlert} onClick={() => toggleDrill("safety")} active={drill === "safety"} />
       </div>
+
+      {drill === "practitioners" && (
+        <Panel className="p-5">
+          <ChartTitle eyebrow="Drill-down · practitioners" title="Activity by practitioner" note="Cases, check-ins, and orders" />
+          <div className="mt-4 overflow-x-auto"><table className="w-full min-w-[500px] text-left text-xs"><thead><tr className="border-b text-[9px] uppercase tracking-wider text-[#72858A]"><th className="py-3">Practitioner ID</th><th>Monitored cases</th><th>Follow-up check-ins</th><th>Direct orders</th></tr></thead><tbody>{practitionerActivity.slice(0,8).map((row: AnyRecord) => <tr key={row.id} className="border-b border-[#123F52]/7"><td className="py-3 font-bold text-[#123F52]">{row.id}</td><td>{row.cases}</td><td><span className="bg-[#E7F5EF] px-2 py-0.5 font-bold text-[#16857F]">{row.checkins}</span></td><td>{row.orders}</td></tr>)}</tbody></table></div>
+          <p className="mt-3 text-[10px] text-[#71858B]">Check-in volume reflects patient engagement with each practitioner's monitoring program. Practitioners with 0 orders may be in the clinical-only track.</p>
+        </Panel>
+      )}
+
+      {drill === "enrolled" && (
+        <Panel className="p-5">
+          <ChartTitle eyebrow="Drill-down · enrolled cases" title="Patient concern breakdown" note="Monitored domains across all cases" />
+          <div className="mt-4 h-[240px]"><ResponsiveContainer width="100%" height="100%"><BarChart data={concernBreakdown} layout="vertical" margin={{ left: 20 }}><CartesianGrid stroke="#E6ECE8" horizontal={false} /><XAxis type="number" tick={{ fontSize: 10 }} axisLine={false} /><YAxis dataKey="name" type="category" width={80} tick={{ fontSize: 10 }} axisLine={false} tickLine={false} /><Tooltip content={<ChartTooltip />} /><Bar dataKey="value" name="Cases" fill="#24A9A3" radius={[0,3,3,0]} /></BarChart></ResponsiveContainer></div>
+          <p className="mt-3 text-[10px] text-[#71858B]">Cases may have multiple monitored concerns. Counts represent case-concern pairs, not unique cases.</p>
+        </Panel>
+      )}
+
+      {drill === "products" && (
+        <Panel className="p-5">
+          <ChartTitle eyebrow="Drill-down · active products" title="Monitored cases and follow-up completion by product" note="Primary product exposure only" />
+          <div className="mt-4 h-[240px]"><ResponsiveContainer width="100%" height="100%"><BarChart data={productUse} layout="vertical" margin={{ left: 20 }}><CartesianGrid stroke="#E6ECE8" horizontal={false} /><XAxis type="number" tick={{ fontSize: 10 }} axisLine={false} /><YAxis dataKey="name" type="category" width={90} tick={{ fontSize: 10 }} axisLine={false} tickLine={false} /><Tooltip content={<ChartTooltip />} /><Bar dataKey="Cases" name="Monitored cases" fill="#153F50" radius={[0,2,2,0]} /><Bar dataKey="Completed" name="Completed follow-up" fill="#24A9A3" radius={[0,2,2,0]} /></BarChart></ResponsiveContainer></div>
+          {discontinued > 0 && <div className="mt-3 bg-[#FFF2EF] p-3 text-xs text-[#9A4C42]"><b>{discontinued} discontinuation{discontinued > 1 ? "s" : ""} recorded.</b> Review individual cases in Patient Outcome Intelligence for context.</div>}
+        </Panel>
+      )}
+
+      {drill === "checkins" && (
+        <Panel className="p-5">
+          <ChartTitle eyebrow="Drill-down · patient check-ins" title="Plan adherence by week" note="Self-reported adherence across all monitored cases" />
+          <div className="mt-4 h-[260px]"><ResponsiveContainer width="100%" height="100%"><BarChart data={adherenceByWeek}><CartesianGrid stroke="#E6ECE8" vertical={false} /><XAxis dataKey="week" tick={{ fontSize: 10 }} axisLine={false} /><YAxis tick={{ fontSize: 10 }} axisLine={false} /><Tooltip content={<ChartTooltip />} /><Legend wrapperStyle={{ fontSize: 10 }} /><Bar dataKey="yes" name="Followed plan" stackId="a" fill="#24A9A3" /><Bar dataKey="partial" name="Partial" stackId="a" fill="#E5A64D" /><Bar dataKey="no" name="Did not follow" stackId="a" fill="#D97869" /></BarChart></ResponsiveContainer></div>
+          <p className="mt-3 text-[10px] text-[#71858B]">Patient self-report only. Adherence is not independently verified. Weeks with no check-ins are not shown.</p>
+        </Panel>
+      )}
+
+      {drill === "reports" && (
+        <Panel className="p-5">
+          <ChartTitle eyebrow="Drill-down · patient outcome reports" title="What this program produced vs. the previous 3 years" note="Illustrative comparison · fictional data" />
+          <div className="mt-4 grid gap-4 sm:grid-cols-3">
+            {[
+              { label: "Reports generated — prior 3 years", value: "28", sub: "5-6 NDs, manual and unstructured", tone: "rose" },
+              { label: "Structured records — this program", value: String(completedReports), sub: "Longitudinal, permissioned, exportable", tone: "teal" },
+              { label: "Avg. follow-up observations per case", value: (checkins.length && cases.length) ? (checkins.length / cases.length).toFixed(1) : "n/a", sub: "Patient check-ins per enrolled case", tone: "navy" },
+            ].map(({ label, value, sub, tone }) => {
+              const bg = tone === "rose" ? "bg-[#FFF2EF]" : tone === "teal" ? "bg-[#EAF5F1]" : "bg-[#EAF1F4]";
+              const col = tone === "rose" ? "text-[#9A4C42]" : tone === "teal" ? "text-[#147F79]" : "text-[#123F52]";
+              return <div key={label} className={`${bg} p-4`}><p className="text-[10px] font-bold uppercase tracking-wider text-[#71858B]">{label}</p><p className={`mt-3 font-display text-4xl font-semibold ${col}`}>{value}</p><p className="mt-2 text-[10px] text-[#71858B]">{sub}</p></div>;
+            })}
+          </div>
+          <div className="mt-4 bg-[#0D3444] p-4 text-xs text-white/70">
+            <b className="text-[#D9F06F]">Why this matters:</b> The prior 3-year program generated fewer than 30 reports from 5-6 NDs with no structured data. This program generates structured, longitudinal, permissioned records with every check-in — enabling product-level outcome analysis that was previously impossible without a clinical trial.
+          </div>
+          <button onClick={onCases} className="mt-4 flex items-center gap-2 text-xs font-bold text-[#168D88]">Open individual case records <ChevronRight className="size-3.5" /></button>
+        </Panel>
+      )}
+
+      {drill === "engagement" && (
+        <Panel className="p-5">
+          <ChartTitle eyebrow="Drill-down · practitioner engagement" title="Order activity by month" note="Practitioners who ordered in this period" />
+          <div className="mt-4 h-[240px]"><ResponsiveContainer width="100%" height="100%"><BarChart data={ordersByMonth}><CartesianGrid stroke="#E6ECE8" vertical={false} /><XAxis dataKey="month" tick={{ fontSize: 9 }} axisLine={false} /><YAxis tick={{ fontSize: 9 }} axisLine={false} /><Tooltip content={<ChartTooltip />} /><Bar dataKey="count" name="Orders" fill="#153F50" /><Bar dataKey="value" name="Revenue (CAD)" fill="#24A9A3" /></BarChart></ResponsiveContainer></div>
+          <p className="mt-3 text-[10px] text-[#71858B]">Practitioners who order but have not enrolled patients in monitoring are not yet linked to outcome data.</p>
+        </Panel>
+      )}
+
+      {drill === "orders" && (
+        <Panel className="p-5">
+          <ChartTitle eyebrow="Drill-down · orders" title="Order volume over time" note="All linked direct manufacturer orders" />
+          <div className="mt-4 h-[240px]"><ResponsiveContainer width="100%" height="100%"><AreaChart data={ordersByMonth}><CartesianGrid stroke="#E6ECE8" vertical={false} /><XAxis dataKey="month" tick={{ fontSize: 9 }} axisLine={false} /><YAxis tick={{ fontSize: 9 }} axisLine={false} /><Tooltip content={<ChartTooltip />} /><Area dataKey="count" name="Orders placed" stroke="#153F50" fill="#153F5020" strokeWidth={2} /></AreaChart></ResponsiveContainer></div>
+          <button onClick={onNetwork} className="mt-3 flex items-center gap-2 text-xs font-bold text-[#168D88]">Open full order and network view <ChevronRight className="size-3.5" /></button>
+        </Panel>
+      )}
+
+      {drill === "revenue" && (
+        <Panel className="p-5">
+          <ChartTitle eyebrow="Drill-down · revenue" title="Revenue by month" note="Fictional wholesale CAD · illustrative only" />
+          <div className="mt-4 h-[240px]"><ResponsiveContainer width="100%" height="100%"><AreaChart data={ordersByMonth}><CartesianGrid stroke="#E6ECE8" vertical={false} /><XAxis dataKey="month" tick={{ fontSize: 9 }} axisLine={false} /><YAxis tick={{ fontSize: 9 }} axisLine={false} /><Tooltip content={<ChartTooltip />} /><Area dataKey="value" name="Revenue (CAD)" stroke="#24A9A3" fill="#24A9A320" strokeWidth={2} /></AreaChart></ResponsiveContainer></div>
+          <p className="mt-3 text-[10px] text-[#71858B]">All values are fictional demonstration figures. No real financial data is represented.</p>
+        </Panel>
+      )}
+
+      {drill === "frequency" && (
+        <Panel className="p-5">
+          <ChartTitle eyebrow="Drill-down · purchasing frequency" title="Orders per practitioner" note="Linked commercial accounts only" />
+          <div className="mt-4 overflow-x-auto"><table className="w-full min-w-[420px] text-xs"><thead><tr className="border-b text-[9px] uppercase tracking-wider text-[#72858A]"><th className="py-3">Practitioner ID</th><th>Orders placed</th><th>Total CAD</th><th>Avg. order</th></tr></thead><tbody>{practitionerActivity.filter((r: AnyRecord) => r.orders > 0).map((row: AnyRecord) => { const rev = orders.filter((o: AnyRecord) => o.practitionerId === row.id).reduce((s: number, o: AnyRecord) => s + (o.totalCAD || 0), 0); return <tr key={row.id} className="border-b border-[#123F52]/7"><td className="py-3 font-bold text-[#123F52]">{row.id}</td><td>{row.orders}</td><td className="font-bold">{money(rev)}</td><td>{money(row.orders ? rev / row.orders : 0)}</td></tr>; })}</tbody></table></div>
+        </Panel>
+      )}
+
+      {drill === "safety" && (
+        <Panel className="p-5">
+          <ChartTitle eyebrow="Drill-down · administration and safety signals" title="Possible adverse-effect entries by product" note="Patient-reported only, not verified or attributed" />
+          <div className="mt-4 grid gap-4 sm:grid-cols-2">
+            <div>
+              <p className="text-[10px] font-bold uppercase tracking-wider text-[#71858B]">Possible AE entries by product</p>
+              <div className="mt-3 h-[200px]"><ResponsiveContainer width="100%" height="100%"><BarChart data={aeByProduct} layout="vertical" margin={{ left: 10 }}><CartesianGrid stroke="#E6ECE8" horizontal={false} /><XAxis type="number" tick={{ fontSize: 10 }} axisLine={false} /><YAxis dataKey="productId" type="category" width={70} tick={{ fontSize: 10 }} axisLine={false} tickLine={false} /><Tooltip content={<ChartTooltip />} /><Bar dataKey="count" name="Possible AE entries" fill="#D97869" radius={[0,3,3,0]} /></BarChart></ResponsiveContainer></div>
+            </div>
+            <div className="space-y-3">
+              <Signal label="Administration change reports" value={changed} detail="Patient-reported timing or frequency adjustment" tone="amber" />
+              <Signal label="Possible adverse-effect entries" value={adverse} detail="Requires human review, not attributed to product" tone="rose" />
+            </div>
+          </div>
+          <div className="mt-4 bg-[#FFF5DE] p-3 text-[10px] text-[#775722]"><b>Guardrail:</b> These are unverified patient self-reports. No product attribution or causal claim is supported. Individual case review is required.</div>
+          <button onClick={onCases} className="mt-3 flex items-center gap-2 text-xs font-bold text-[#168D88]">Review individual cases <ChevronRight className="size-3.5" /></button>
+        </Panel>
+      )}
+
       <Panel className="grid gap-px overflow-hidden bg-[#123F52]/8 sm:grid-cols-3">
         <div className="bg-white p-4"><p className="text-[9px] font-bold uppercase tracking-wider text-[#17918B]">Patient check-in completion</p><p className="mt-2 text-sm font-bold text-[#123F52]">{completion}</p><p className="mt-1 text-[10px] text-[#71858B]">Scheduled week-{period} check-in completed / all eligible cases.</p></div>
         <div className="bg-white p-4"><p className="text-[9px] font-bold uppercase tracking-wider text-[#17918B]">Clinical follow-up completion</p><p className="mt-2 text-sm font-bold text-[#123F52]">Not available</p><p className="mt-1 text-[10px] text-[#71858B]">The seed does not include a complete assessment schedule denominator.</p></div>
-        <div className="bg-white p-4"><p className="text-[9px] font-bold uppercase tracking-wider text-[#17918B]">NDMAPS reporting completion</p><p className="mt-2 text-sm font-bold text-[#123F52]">{completedReports} clinician-reviewed reports</p><p className="mt-1 text-[10px] text-[#71858B]">Separate from patient check-ins and practitioner follow-up.</p></div>
+        <div className="bg-white p-4"><p className="text-[9px] font-bold uppercase tracking-wider text-[#17918B]">Longitudinal reporting</p><p className="mt-2 text-sm font-bold text-[#123F52]">{completedReports} structured records</p><p className="mt-1 text-[10px] text-[#71858B]">Clinician-reviewed longitudinal case records with patient consent.</p></div>
       </Panel>
       <div className="grid gap-5 xl:grid-cols-[1.45fr_.85fr]">
         <Panel className="p-5">
@@ -336,7 +497,7 @@ function Overview({ cases, checkins, orders, activeProducts, completion, complet
           <button onClick={onNetwork} className="mt-3 flex items-center gap-2 text-xs font-bold text-[#168D88]">Open practitioner network <ChevronRight className="size-3.5" /></button>
         </Panel>
         <Panel className="p-5">
-          <ChartTitle eyebrow="Commercial intelligence" title="Sales & ordering trend" note="Direct manufacturer orders" />
+          <ChartTitle eyebrow="Commercial intelligence" title="Sales and ordering trend" note="Direct manufacturer orders" />
           <div className="mt-4 h-[220px]"><ResponsiveContainer width="100%" height="100%"><AreaChart data={monthlySales}><CartesianGrid key="overview-sales-grid" stroke="#E6ECE8" vertical={false} /><XAxis key="overview-sales-x" dataKey="month" tick={{ fontSize: 9 }} axisLine={false} /><YAxis key="overview-sales-y" tick={{ fontSize: 9 }} axisLine={false} width={42} /><Tooltip key="overview-sales-tooltip" content={<ChartTooltip />} /><Area key="overview-sales-revenue" dataKey="Revenue" stroke="#153F50" fill="#153F5020" strokeWidth={2} /></AreaChart></ResponsiveContainer></div>
         </Panel>
         <Panel className="bg-[#0D3444] p-5 text-white">
@@ -352,6 +513,7 @@ function Overview({ cases, checkins, orders, activeProducts, completion, complet
     </div>
   );
 }
+
 
 function ChartTitle({ eyebrow, title, note }: { eyebrow: string; title: string; note: string }) {
   return <div><p className="text-[9px] font-bold uppercase tracking-[0.16em] text-[#17918B]">{eyebrow}</p><div className="mt-1 flex items-end justify-between gap-4"><h2 className="font-display text-xl font-semibold text-[#123F52]">{title}</h2><p className="hidden text-[10px] text-[#78898E] sm:block">{note}</p></div></div>;
@@ -508,7 +670,7 @@ function Insight({ type, title, text, tone }: { type: string; title: string; tex
 function Monai({ cases, checkins, orders, products, practitioners, onCases, onExport }: AnyRecord) {
   const prompts = [
     "Which products have the highest follow-up completion rates?",
-    "Show sleep trends for ZenPress cases.",
+    "Show sleep trends for CalmFocus cases.",
     "How many patients reported changing the timing of their supplements?",
     "Which provinces have the strongest direct-order growth?",
     "What are the most common reasons patients discontinue products?",
@@ -523,10 +685,10 @@ function Monai({ cases, checkins, orders, products, practitioners, onCases, onEx
       const result = products.map((product: AnyRecord) => { const ids = cases.filter((item: AnyRecord) => item.primaryProductId === product.productId).map((item: AnyRecord) => item.id); const done = new Set(checkins.filter((row: AnyRecord) => ids.includes(row.caseId) && row.week >= 6).map((row: AnyRecord) => row.caseId)).size; return { label: product.name, value: ids.length ? Math.round(done / ids.length * 100) : 0 }; }).filter((item: AnyRecord) => item.value).sort((a: AnyRecord, b: AnyRecord) => b.value - a.value);
       return { title: "Follow-up completion by product", text: `${result[0]?.label || "No product"} has the highest completion among the active, authorized cohort at ${result[0]?.value || 0}%. This is an operational completion measure, not a clinical outcome.`, chart: result.slice(0, 6) };
     }
-    if (q.includes("zenpress") || q.includes("sleep trend")) {
-      const ids = new Set(cases.filter((item: AnyRecord) => products.find((p: AnyRecord) => p.productId === item.primaryProductId)?.name === "ZenPress").map((item: AnyRecord) => item.id));
+    if (q.includes("calmfocus") || q.includes("sleep trend")) {
+      const ids = new Set(cases.filter((item: AnyRecord) => products.find((p: AnyRecord) => p.productId === item.primaryProductId)?.name === "CalmFocus").map((item: AnyRecord) => item.id));
       const chart = Array.from({ length: 9 }, (_, week) => { const rows = checkins.filter((item: AnyRecord) => ids.has(item.caseId) && item.week === week && typeof item.sleepQuality0to10 === "number"); return { label: `W${week}`, value: rows.length ? +(rows.reduce((sum: number, item: AnyRecord) => sum + item.sleepQuality0to10, 0) / rows.length).toFixed(1) : 0 }; });
-      return { title: "ZenPress sleep-quality trend", text: `${ids.size} authorized ZenPress cases are included. The chart describes available self-reports; concurrent care, adherence, selection and missing follow-ups limit interpretation.`, chart };
+      return { title: "CalmFocus sleep-quality trend", text: `${ids.size} authorized CalmFocus cases are included. The chart describes available self-reports; concurrent care, adherence, selection and missing follow-ups limit interpretation.`, chart };
     }
     if (q.includes("timing")) {
       const ids = new Set(checkins.filter((item: AnyRecord) => item.reportedDoseChange).map((item: AnyRecord) => item.caseId));
