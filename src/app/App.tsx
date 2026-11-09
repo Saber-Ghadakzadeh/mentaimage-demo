@@ -610,6 +610,7 @@ function Processing({ onDone }: { onDone: () => void }) {
 
 function PatientDashboard({
   onHome,
+  onLanding,
   onStart,
   onBreathing,
   onTherapist,
@@ -620,6 +621,7 @@ function PatientDashboard({
   latestResult,
 }: {
   onHome: () => void;
+  onLanding?: () => void;
   onStart: () => void;
   onBreathing: () => void;
   onTherapist: () => void;
