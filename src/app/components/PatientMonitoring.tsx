@@ -6,12 +6,8 @@ import { nextDueDate } from "./PractitionerMonitoring";
 export function PatientCareCheckIn({ caseId = "C-1001", onBack, onComplete }: { caseId?: string; onBack: () => void; onComplete: () => void }) {
   const data = useNDMAPS();
   const program = data.monitoringPrograms[caseId]?.[0];
-  const today = new Date();
-  const questions = program?.questions.filter((question) => {
-    if (question.paused) return false;
-    const due = nextDueDate(question, today);
-    return due?.toDateString() === today.toDateString();
-  }) || [];
+  // Show all active (non-paused) questions so practitioner changes are immediately visible in demo
+  const questions = program?.questions.filter((question) => !question.paused) || [];
   const [step, setStep] = useState(0);
   const [answers, setAnswers] = useState<Record<string, string | number | string[]>>({});
   const [done, setDone] = useState(false);
@@ -57,11 +53,12 @@ export function PatientCareCheckInCard({ caseId = "C-1001", onStart }: { caseId?
   const data = useNDMAPS();
   const program = data.monitoringPrograms[caseId]?.[0];
   const responses = data.monitoringResponses.filter((response) => response.caseId === caseId);
-  const today = new Date();
-  const dueQuestions = program?.questions.filter((question) => !question.paused && nextDueDate(question,today)?.toDateString() === today.toDateString()) || [];
-  const count = dueQuestions.length;
-  const domains = useMemo(() => [...new Set(dueQuestions.map((question) => question.domain))], [program, count]);
-  return <article className="rounded-[28px] border border-[#D9F06F]/25 bg-[#D9F06F]/12 p-5 backdrop-blur-xl"><div className="flex items-start justify-between gap-3"><div><p className="text-[10px] font-bold uppercase tracking-[.16em] text-[#D9F06F]">My Care Check-ins</p><h2 className="font-display mt-2 text-2xl font-semibold">{program?.name || "No check-in due"}</h2><p className="mt-2 text-xs text-white/55">{count ? `${count} questions · About 45 seconds · ${domains.join(" + ")}` : "Your practitioner has not assigned questions yet."}</p></div><span className="rounded-full bg-white/10 px-2 py-1 text-[9px] font-bold">{responses.length ? `${responses.length} saved` : "READY"}</span></div>{count>0&&<button onClick={onStart} className="mt-5 flex w-full items-center justify-center gap-2 rounded-xl bg-[#D9F06F] py-3 text-sm font-bold text-[#123F52]">Start care check-in <ChevronRight className="size-4" /></button>}</article>;
+  const activeQuestions = program?.questions.filter((question) => !question.paused) || [];
+  const count = activeQuestions.length;
+  const domains = useMemo(() => [...new Set(activeQuestions.map((question) => question.domain))], [program, count]);
+  const estSeconds = count * 15;
+  const estLabel = estSeconds < 60 ? `About ${estSeconds} seconds` : `About ${Math.round(estSeconds / 60)} minute${Math.round(estSeconds / 60) > 1 ? "s" : ""}`;
+  return <article className="rounded-[28px] border border-[#D9F06F]/25 bg-[#D9F06F]/12 p-5 backdrop-blur-xl"><div className="flex items-start justify-between gap-3"><div><p className="text-[10px] font-bold uppercase tracking-[.16em] text-[#D9F06F]">My Care Check-ins</p><h2 className="font-display mt-2 text-2xl font-semibold">{program?.name || "No check-in assigned"}</h2><p className="mt-2 text-xs text-white/55">{count ? `${count} question${count > 1 ? "s" : ""} · ${estLabel} · ${domains.join(" + ")}` : "Your practitioner has not assigned questions yet."}</p></div><span className="rounded-full bg-white/10 px-2 py-1 text-[9px] font-bold">{responses.length ? `${responses.length} saved` : "READY"}</span></div>{count>0&&<button onClick={onStart} className="mt-5 flex w-full items-center justify-center gap-2 rounded-xl bg-[#D9F06F] py-3 text-sm font-bold text-[#123F52]">Start care check-in <ChevronRight className="size-4" /></button>}</article>;
 }
 
 export function PersonalizedCareWorkspace({ caseId, patientName, onBack }: { caseId: string; patientName: string; onBack: () => void }) {

@@ -48,9 +48,14 @@ const assign = (id: string, frequency: AssignedQuestion["frequency"], interval =
   required: true, frequency, interval, weekdays, reminderTime: "08:00", startDate: "2026-11-01",
 });
 const initialPrograms: Record<string, MonitoringProgram[]> = {
-  "C-1001": [{ id: "MP-ALEX-SLEEP", caseId: "C-1001", name: "Sleep Monitoring", practitionerName: "Dr. Avery Morgan", active: true, updatedAt: "2026-11-07", questions: [assign("sleep-quality", "daily"), assign("sleep-hours", "daily"), assign("sleep-impact", "interval_days", 3)] }],
-  "PK-SAM-01": [{ id: "MP-SAM-ANXIETY", caseId: "PK-SAM-01", name: "Anxiety Monitoring", practitionerName: "Dr. Avery Morgan", active: true, updatedAt: "2026-11-07", questions: [assign("anxiety-intensity", "interval_days", 2), assign("coping-used", "weekly", 1, [0])] }],
-  "PK-MORGAN-01": [{ id: "MP-MORGAN-MIXED", caseId: "PK-MORGAN-01", name: "Sleep & Anxiety Monitoring", practitionerName: "Dr. Avery Morgan", active: true, updatedAt: "2026-11-07", questions: [assign("sleep-quality", "daily"), assign("anxiety-intensity", "weekly", 1, [1,3,5]), assign("adherence", "interval_days", 3)] }],
+  "C-1001": [{ id: "MP-ALEX-SLEEP", caseId: "C-1001", name: "Sleep Monitoring", practitionerName: "Dr. Avery Morgan", active: true, updatedAt: "2026-11-07", questions: [assign("sleep-quality", "daily"), assign("sleep-hours", "daily"), assign("sleep-impact", "interval_days", 3), assign("adherence", "interval_days", 3)] }],
+  "PK-PRIYA-01": [{ id: "MP-PRIYA-SLEEP", caseId: "PK-PRIYA-01", name: "Sleep & Recovery Monitoring", practitionerName: "Dr. Avery Morgan", active: true, updatedAt: "2026-11-07", questions: [assign("sleep-quality", "daily"), assign("sleep-rested", "daily"), assign("sleep-latency", "interval_days", 2), assign("possible-effect", "interval_days", 3)] }],
+  "PK-JORDAN-01": [{ id: "MP-JORDAN-ENERGY", caseId: "PK-JORDAN-01", name: "Energy & Fatigue Monitoring", practitionerName: "Dr. Avery Morgan", active: true, updatedAt: "2026-11-07", questions: [assign("energy", "interval_days", 2), assign("adherence", "interval_days", 3), assign("dose-change", "interval_days", 3), assign("practitioner-note", "weekly", 1, [1])] }],
+  "PK-OMAR-01": [{ id: "MP-OMAR-SLEEP", caseId: "PK-OMAR-01", name: "Sleep Check-in", practitionerName: "Dr. Avery Morgan", active: true, updatedAt: "2026-11-07", questions: [assign("sleep-quality", "daily"), assign("sleep-hours", "daily"), assign("sleep-awakenings", "daily"), assign("adherence", "interval_days", 3)] }],
+  "PK-SAM-01": [{ id: "MP-SAM-ANXIETY", caseId: "PK-SAM-01", name: "Anxiety Monitoring", practitionerName: "Dr. Avery Morgan", active: true, updatedAt: "2026-11-07", questions: [assign("anxiety-intensity", "interval_days", 2), assign("anxiety-interference", "interval_days", 2), assign("coping-used", "weekly", 1, [0]), assign("practitioner-note", "weekly", 1, [0])] }],
+  "PK-TAYLOR-01": [{ id: "MP-TAYLOR-MOOD", caseId: "PK-TAYLOR-01", name: "Mood & Wellbeing Monitoring", practitionerName: "Dr. Avery Morgan", active: true, updatedAt: "2026-11-07", questions: [assign("energy", "interval_days", 2), assign("adherence", "interval_days", 3), assign("possible-effect", "weekly", 1, [1])] }],
+  "PK-MORGAN-01": [{ id: "MP-MORGAN-MIXED", caseId: "PK-MORGAN-01", name: "Sleep & Anxiety Monitoring", practitionerName: "Dr. Avery Morgan", active: true, updatedAt: "2026-11-07", questions: [assign("sleep-quality", "daily"), assign("sleep-rested", "interval_days", 2), assign("anxiety-intensity", "interval_days", 2), assign("anxiety-interference", "interval_days", 2), assign("adherence", "interval_days", 3)] }],
+  "PK-JAMIE-01": [{ id: "MP-JAMIE-MOOD", caseId: "PK-JAMIE-01", name: "Mood & Sleep Monitoring", practitionerName: "Dr. Avery Morgan", active: true, updatedAt: "2026-11-07", questions: [assign("sleep-quality", "daily"), assign("sleep-hours", "daily"), assign("energy", "interval_days", 3), assign("adherence", "interval_days", 3), assign("practitioner-note", "weekly", 1, [3])] }],
 };
 
 type ContextValue = {
@@ -88,7 +93,7 @@ const save = (key: string, value: unknown) => { try { window.localStorage.setIte
 
 export function NDMAPSProvider({ children }: { children: React.ReactNode }) {
   const initialConsents = Object.fromEntries(seed.cases.map((item) => [item.id, item.consent.allowDeidentifiedResearchAndProductImprovement]));
-  const storageVersion = "ndmaps-qc1";
+  const storageVersion = "ndmaps-qc2";
   if (get("ndmaps-storage-version", "") !== storageVersion) {
     ["ndmaps-messages", "ndmaps-consents", "ndmaps-inventory", "ndmaps-appointments"].forEach((key) => window.localStorage.removeItem(key));
     save("ndmaps-storage-version", storageVersion);
