@@ -74,11 +74,13 @@ function Brand() {
 function AppShell({
   children,
   onHome,
+  onLanding,
   onTherapist,
   compact = false,
 }: {
   children: React.ReactNode;
   onHome: () => void;
+  onLanding?: () => void;
   onTherapist: () => void;
   compact?: boolean;
 }) {
@@ -89,7 +91,7 @@ function AppShell({
       <div className="fixed -right-10 top-[34%] size-56 rounded-full border border-white/10" />
       <div className="relative mx-auto max-w-[1440px] px-4 sm:px-7 lg:px-10">
         <header className={`flex items-center justify-between ${compact ? "py-5" : "py-6 lg:py-8"}`}>
-          <button onClick={onHome} className="rounded-xl text-left focus:outline-none focus:ring-2 focus:ring-[#D9F06F]">
+          <button onClick={onLanding ?? onHome} title="Return to demo home" className="rounded-xl text-left focus:outline-none focus:ring-2 focus:ring-[#D9F06F]">
             <Brand />
           </button>
           <button
@@ -111,13 +113,15 @@ function PatientHome({
   onStart,
   onDashboard,
   onTherapist,
+  onLanding,
 }: {
   onStart: () => void;
   onDashboard: () => void;
   onTherapist: () => void;
+  onLanding?: () => void;
 }) {
   return (
-    <AppShell onHome={() => undefined} onTherapist={onTherapist}>
+    <AppShell onHome={() => undefined} onLanding={onLanding} onTherapist={onTherapist}>
       <main className="grid min-h-[calc(100vh-104px)] items-center gap-8 pb-10">
         <section className="max-w-2xl py-4 lg:py-10">
           <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-[#D9F06F]/30 bg-[#D9F06F]/12 px-3 py-1.5 text-xs font-bold text-[#E8F79D]">
@@ -630,7 +634,7 @@ function PatientDashboard({
   const liveProgress = [...patientProgress, ...sharedData.microCheckins.filter((item) => item.caseId === patientCaseId).slice(0,3).reverse().map((item) => ({ week: item.date.slice(5), wellbeing: item.sleepQuality0to10 * 10, energy: Math.max(0, 100 - item.anxietySeverity0to10 * 10) }))];
 
   return (
-    <AppShell onHome={onHome} onTherapist={onTherapist}>
+    <AppShell onHome={onHome} onLanding={onLanding} onTherapist={onTherapist}>
       <main className="pb-12 pt-3">
         {latestResult && (
           <motion.div initial={{ opacity: 0, y: -8 }} animate={{ opacity: 1, y: 0 }} className="mb-5 flex flex-col justify-between gap-4 rounded-2xl border border-[#D9F06F]/30 bg-[#D9F06F]/14 p-4 sm:flex-row sm:items-center">
@@ -975,7 +979,7 @@ function PatientExperience() {
     return withRoles(<Processing onDone={() => setView("patient-dashboard")} />);
   }
   if (view === "patient-dashboard") {
-    return withRoles(<PatientDashboard patientCaseId={patientCaseId} patientName={patientName} onHome={patientHome} onStart={() => setView("checkin")} onCareCheckin={() => setView("care-checkin")} onBreathing={() => setView("breathing")} onTherapist={therapist} onCare={() => setView("care")} latestResult={latestResult} />);
+    return withRoles(<PatientDashboard patientCaseId={patientCaseId} patientName={patientName} onHome={patientHome} onLanding={() => navigate("/")} onStart={() => setView("checkin")} onCareCheckin={() => setView("care-checkin")} onBreathing={() => setView("breathing")} onTherapist={therapist} onCare={() => setView("care")} latestResult={latestResult} />);
   }
   if (view === "breathing") {
     return withRoles(<BreathingExercise onBack={() => setView("patient-dashboard")} onTherapist={therapist} />);
@@ -984,7 +988,7 @@ function PatientExperience() {
     if (patientCaseId !== "C-1001") return withRoles(<PersonalizedCareWorkspace caseId={patientCaseId} patientName={patientName} onBack={() => setView("patient-dashboard")} />);
     return withRoles(<PatientCare onBack={() => setView("patient-dashboard")} onPractitioner={() => navigate("/practitioner/ndmaps")} />);
   }
-  return withRoles(<PatientHome onStart={() => setView("checkin")} onDashboard={() => setView("patient-dashboard")} onTherapist={therapist} />);
+  return withRoles(<PatientHome onStart={() => setView("checkin")} onDashboard={() => setView("patient-dashboard")} onTherapist={therapist} onLanding={() => navigate("/")} />);
 }
 
 function PortalRoleSwitcher({ active, onPatient, onPractitioner, onManufacturer }: { active: "patient" | "practitioner"; onPatient: () => void; onPractitioner: () => void; onManufacturer: () => void }) {

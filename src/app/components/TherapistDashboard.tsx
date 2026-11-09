@@ -30,6 +30,7 @@ import {
   XAxis,
   YAxis,
 } from "recharts";
+import { useNavigate } from "react-router";
 import { ImageWithFallback } from "./figma/ImageWithFallback";
 import officialLogo from "../../imports/2.png";
 import { ClientDirectory, MonitoringPanel, ProgramBuilder, type DirectoryClient } from "./PractitionerMonitoring";
@@ -85,6 +86,7 @@ const recommendations = [
 ];
 
 export function TherapistDashboard({ onBackToCheckIn, onOpenNDMAPS, onOpenInventory }: TherapistDashboardProps) {
+  const navigate = useNavigate();
   const [search, setSearch] = useState("");
   const [range, setRange] = useState("6 weeks");
   const [approved, setApproved] = useState<number[]>([3]);
@@ -159,10 +161,10 @@ export function TherapistDashboard({ onBackToCheckIn, onOpenNDMAPS, onOpenInvent
       <div className="fixed inset-0 pointer-events-none bg-[radial-gradient(circle_at_78%_12%,rgba(77,213,194,0.36),transparent_28%),radial-gradient(circle_at_8%_80%,rgba(29,128,142,0.35),transparent_34%),linear-gradient(145deg,#0B3D55_0%,#0E5369_54%,#169A94_100%)]" />
       <div className="relative mx-auto grid min-h-screen max-w-[1600px] lg:grid-cols-[250px_1fr]">
         <aside className="hidden border-r border-white/10 bg-[#062E43]/55 px-5 py-7 backdrop-blur-xl lg:flex lg:flex-col">
-          <div className="mb-10 rounded-xl bg-white p-3">
+          <button onClick={() => navigate("/")} title="Return to demo home" className="mb-10 block w-full rounded-xl bg-white p-3 text-left transition hover:ring-2 hover:ring-[#17A7A3]">
             <ImageWithFallback src={officialLogo} alt="mentAImage official logo" className="h-8 w-auto object-contain" />
             <p className="mt-2 border-t border-[#123F52]/10 pt-2 text-[10px] font-bold uppercase tracking-[0.2em] text-[#426874]">PulseKey™ for Practitioners</p>
-          </div>
+          </button>
 
           <nav className="space-y-2" aria-label="Therapist navigation">
             <button onClick={() => setWorkspace("today")} className="flex w-full items-center gap-3 rounded-xl bg-white/12 px-4 py-3 text-sm font-semibold shadow-inner shadow-white/5">
@@ -199,9 +201,9 @@ export function TherapistDashboard({ onBackToCheckIn, onOpenNDMAPS, onOpenInvent
         <main className="min-w-0 px-4 py-5 sm:px-7 sm:py-7 xl:px-10">
           <header className="mb-7 flex items-center justify-between gap-4">
             <div className="flex items-center gap-3 lg:hidden">
-              <div className="rounded-xl bg-white p-2">
+              <button onClick={() => navigate("/")} title="Return to demo home" className="rounded-xl bg-white p-2 hover:ring-2 hover:ring-[#17A7A3]">
                 <ImageWithFallback src={officialLogo} alt="mentAImage official logo" className="h-6 w-auto object-contain" />
-              </div>
+              </button>
             </div>
             <div className="hidden lg:block">
               <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[#D9F06F]">
@@ -463,9 +465,9 @@ function PractitionerPageHeader({
         </div>
       </div>
       <div className="flex items-center gap-3">
-        <div className="hidden rounded-xl bg-white p-2 shadow-sm sm:block">
+        <button onClick={() => navigate("/")} title="Return to demo home" className="hidden rounded-xl bg-white p-2 shadow-sm sm:block hover:ring-2 hover:ring-[#17A7A3]">
           <ImageWithFallback src={officialLogo} alt="mentAImage official logo" className="h-7 w-auto object-contain" />
-        </div>
+        </button>
         <button onClick={onClientMode} className="rounded-xl bg-[#123F52] px-4 py-2.5 text-sm font-bold text-white hover:bg-[#1B5265]">Switch to client</button>
       </div>
     </header>

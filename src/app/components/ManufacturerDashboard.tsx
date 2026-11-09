@@ -1,4 +1,5 @@
 import React, { useMemo, useState } from "react";
+import { useNavigate } from "react-router";
 import {
   Activity, ArrowDownRight, ArrowUpRight, BarChart3, BrainCircuit, Building2,
   CalendarDays, CheckCircle2, ChevronRight, CircleDollarSign, ClipboardList,
@@ -92,6 +93,7 @@ function SelectFilter({ label, value, onChange, options }: { label: string; valu
 }
 
 export function ManufacturerDashboard({ onPatient, onPractitioner }: { onPatient: () => void; onPractitioner: () => void }) {
+  const navigate = useNavigate();
   const d = useNDMAPS();
   const seed = d.seed as AnyRecord;
   const [view, setView] = useState<View>("overview");
@@ -183,7 +185,7 @@ export function ManufacturerDashboard({ onPatient, onPractitioner }: { onPatient
     <aside className={`fixed inset-y-0 left-0 z-50 flex bg-[#0B3041] text-white transition-all duration-300 lg:sticky lg:top-0 lg:h-screen ${mobileNav ? "translate-x-0" : "-translate-x-full lg:translate-x-0"} ${collapsed ? "w-[82px]" : "w-[268px]"}`}>
       <div className="flex w-full flex-col">
         <div className="flex h-[86px] items-center justify-between border-b border-white/10 px-5">
-          {!collapsed && <div className="rounded-lg bg-white px-2.5 py-2"><ImageWithFallback src={officialLogo} alt="mentAImage" className="h-7 w-auto object-contain" /></div>}
+          {!collapsed && <button onClick={() => navigate("/")} title="Return to demo home" className="rounded-lg bg-white px-2.5 py-2 transition hover:ring-2 hover:ring-[#17A7A3]"><ImageWithFallback src={officialLogo} alt="mentAImage" className="h-7 w-auto object-contain" /></button>}
           <button onClick={() => { setCollapsed(!collapsed); setMobileNav(false); }} className="grid size-9 place-items-center border border-white/10 text-white/65 hover:bg-white/10"><PanelLeftClose className={`size-4 transition ${collapsed ? "rotate-180" : ""}`} /></button>
         </div>
         {!collapsed && <div className="px-5 pb-4 pt-5"><p className="text-[9px] font-bold uppercase tracking-[0.22em] text-[#7ADBD3]">Account · Noreva Naturals</p><p className="mt-0.5 text-[8px] text-white/35">Example manufacturer account · illustrative data</p><p className="mt-1.5 font-display text-xl font-semibold">Manufacturer Intelligence</p><p className="mt-1 text-[10px] text-white/40">Role · Manufacturer Administrator</p></div>}
