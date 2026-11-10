@@ -9,33 +9,28 @@ type InfoContent = {
   action: string;
 };
 
-const POPUP_W = 288; // px — matches w-72
+const POPUP_W = 288;
 const POPUP_MAX_H = 420;
 const MARGIN = 12;
 
 function usePopupPosition(btnRef: React.RefObject<HTMLButtonElement | null>, open: boolean) {
-  const [pos, setPos] = useState({ top: 0, left: 0 });
+  const [pos, setPos] = useState({ top: 0, left: 0, opensUp: false, maxH: POPUP_MAX_H });
   const compute = useCallback(() => {
     const btn = btnRef.current;
     if (!btn) return;
     const r = btn.getBoundingClientRect();
     const vw = window.innerWidth;
     const vh = window.innerHeight;
-    // horizontal: centre on button, clamp to viewport
     let left = r.left + r.width / 2 - POPUP_W / 2;
     left = Math.max(MARGIN, Math.min(left, vw - POPUP_W - MARGIN));
-    // vertical: prefer below, fall back to above
     const spaceBelow = vh - r.bottom - MARGIN;
     const spaceAbove = r.top - MARGIN;
-    let top: number;
-    if (spaceBelow >= Math.min(POPUP_MAX_H, 200)) {
-      top = r.bottom + 6;
-    } else if (spaceAbove >= Math.min(POPUP_MAX_H, 200)) {
-      top = r.top - 6; // will anchor to bottom via transform
+    const opensUp = spaceAbove > spaceBelow && spaceAbove >= 160;
+    if (opensUp) {
+      setPos({ top: r.top - 6, left, opensUp: true, maxH: Math.min(POPUP_MAX_H, spaceAbove) });
     } else {
-      top = r.bottom + 6; // just open below and let it scroll
+      setPos({ top: r.bottom + 6, left, opensUp: false, maxH: Math.min(POPUP_MAX_H, Math.max(spaceBelow, 160)) });
     }
-    setPos({ top, left });
   }, [btnRef]);
   useEffect(() => {
     if (!open) return;
@@ -65,12 +60,6 @@ export function InfoButton({ info, dark = false }: { info: InfoContent; dark?: b
     return () => document.removeEventListener("mousedown", handler);
   }, [open]);
 
-  // determine if popup opens upward (not enough space below)
-  const spaceBelow = typeof window !== "undefined"
-    ? window.innerHeight - (btnRef.current?.getBoundingClientRect().bottom ?? 0) - MARGIN
-    : 999;
-  const opensUp = open && spaceBelow < 200 && (btnRef.current?.getBoundingClientRect().top ?? 0) > 200;
-
   return (
     <>
       <button
@@ -87,11 +76,11 @@ export function InfoButton({ info, dark = false }: { info: InfoContent; dark?: b
           onMouseDown={(e) => e.stopPropagation()}
           style={{
             position: "fixed",
-            top: opensUp ? undefined : pos.top,
-            bottom: opensUp ? window.innerHeight - pos.top + 12 : undefined,
+            top: pos.opensUp ? undefined : pos.top,
+            bottom: pos.opensUp ? window.innerHeight - pos.top : undefined,
             left: pos.left,
             width: POPUP_W,
-            maxHeight: POPUP_MAX_H,
+            maxHeight: pos.maxH,
             zIndex: 9999,
           }}
           className="overflow-y-auto rounded-2xl border border-[#123F52]/12 bg-white p-4 shadow-2xl shadow-[#082D3D]/20"
