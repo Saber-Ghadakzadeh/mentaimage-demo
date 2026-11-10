@@ -32,6 +32,7 @@ import {
 } from "recharts";
 import { useNavigate } from "react-router";
 import { ImageWithFallback } from "./figma/ImageWithFallback";
+import { InfoButton, ND_INFO } from "./InfoPopup";
 import officialLogo from "../../imports/2.png";
 import { ClientDirectory, MonitoringPanel, ProgramBuilder, type DirectoryClient } from "./PractitionerMonitoring";
 
@@ -242,11 +243,11 @@ export function TherapistDashboard({ onBackToCheckIn, onOpenNDMAPS, onOpenInvent
 
           <section className="mb-6 grid grid-cols-2 gap-3 xl:grid-cols-5">
             {[
-              { label: "Active clients", value: "24", note: "Fictional demo", icon: Users },
-              { label: "New check-ins", value: "8", note: "Since last review", icon: CalendarDays },
-              { label: "Upcoming sessions", value: "5", note: "Next 7 days", icon: Activity },
-              { label: "Follow-ups due", value: "4", note: "Review before reminder", icon: ClipboardCheck },
-              { label: "Questions", value: "3", note: "Awaiting review", icon: Sparkles },
+              { label: "Active clients", value: "24", note: "Fictional demo", icon: Users, info: ND_INFO.activeClients },
+              { label: "New check-ins", value: "8", note: "Since last review", icon: CalendarDays, info: ND_INFO.newCheckins },
+              { label: "Upcoming sessions", value: "5", note: "Next 7 days", icon: Activity, info: ND_INFO.upcomingSessions },
+              { label: "Follow-ups due", value: "4", note: "Review before reminder", icon: ClipboardCheck, info: ND_INFO.followUpsDue },
+              { label: "Questions", value: "3", note: "Awaiting review", icon: Sparkles, info: ND_INFO.questions },
             ].map((stat) => (
               <article
                 key={stat.label}
@@ -254,7 +255,10 @@ export function TherapistDashboard({ onBackToCheckIn, onOpenNDMAPS, onOpenInvent
               >
                 <div className="mb-5 flex items-start justify-between">
                   <p className="text-xs leading-tight text-white/58 sm:text-sm">{stat.label}</p>
-                  <stat.icon className="size-4 text-[#D9F06F]" />
+                  <div className="flex items-center gap-1.5">
+                    <InfoButton info={stat.info} dark />
+                    <stat.icon className="size-4 text-[#D9F06F]" />
+                  </div>
                 </div>
                 <p className="font-display text-3xl font-semibold tracking-tight sm:text-4xl">{stat.value}</p>
                 <p className="mt-1 text-[11px] text-white/48 sm:text-xs">{stat.note}</p>
@@ -268,7 +272,10 @@ export function TherapistDashboard({ onBackToCheckIn, onOpenNDMAPS, onOpenInvent
                 <div className="mb-7 flex flex-wrap items-start justify-between gap-4">
                   <div>
                     <p className="text-xs font-semibold uppercase tracking-[0.17em] text-[#D9F06F]">Selected client</p>
-                    <h2 className="font-display mt-1 text-2xl font-semibold">{selectedClient.name}&apos;s progress</h2>
+                    <div className="flex items-center gap-2">
+                      <h2 className="font-display mt-1 text-2xl font-semibold">{selectedClient.name}&apos;s progress</h2>
+                      <InfoButton info={ND_INFO.wellbeingChart} dark />
+                    </div>
                     <p className="mt-1 text-sm text-white/50">Consented wellbeing and agency trends · {selectedClient.focus}</p>
                   </div>
                   <label className="relative">
@@ -353,11 +360,14 @@ export function TherapistDashboard({ onBackToCheckIn, onOpenNDMAPS, onOpenInvent
                         <div className="hidden h-1.5 w-24 overflow-hidden rounded-full bg-white/10 sm:block">
                           <div className="h-full rounded-full bg-[#D9F06F]" style={{ width: `${client.score}%` }} />
                         </div>
-                        <div className="text-right">
-                          <p className="text-sm font-semibold">{client.score}</p>
-                          <p className={`text-[10px] ${client.change >= 0 ? "text-[#D9F06F]" : "text-[#FFB6A8]"}`}>
-                            {client.change >= 0 ? "+" : ""}{client.change} pts
-                          </p>
+                        <div className="flex items-center gap-1.5 text-right">
+                          <InfoButton info={ND_INFO.clientScore} dark />
+                          <div>
+                            <p className="text-sm font-semibold">{client.score}</p>
+                            <p className={`text-[10px] ${client.change >= 0 ? "text-[#D9F06F]" : "text-[#FFB6A8]"}`}>
+                              {client.change >= 0 ? "+" : ""}{client.change} pts
+                            </p>
+                          </div>
                         </div>
                       </div>
                     </button>
@@ -372,6 +382,7 @@ export function TherapistDashboard({ onBackToCheckIn, onOpenNDMAPS, onOpenInvent
                   <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-[0.12em] text-[#A54837]">
                     <AlertTriangle className="size-4" />
                     Priority area
+                    <InfoButton info={ND_INFO.priorityArea} />
                   </div>
                   <span className="rounded-full bg-[#F8D3C9] px-2 py-1 text-[10px] font-bold text-[#8E3D31]">REVIEW SOON</span>
                 </div>
@@ -387,7 +398,10 @@ export function TherapistDashboard({ onBackToCheckIn, onOpenNDMAPS, onOpenInvent
               <div className="mb-6 flex items-start justify-between gap-3">
                 <div>
                   <p className="text-xs font-bold uppercase tracking-[0.16em] text-[#177D78]">Clinical review</p>
-                  <h2 className="font-display mt-1 text-2xl font-semibold">Recommendations</h2>
+                  <div className="flex items-center gap-2">
+                    <h2 className="font-display mt-1 text-2xl font-semibold">Recommendations</h2>
+                    <InfoButton info={ND_INFO.recommendations} />
+                  </div>
                 </div>
                 <span className="rounded-full bg-[#DDE8CB] px-3 py-1 text-xs font-bold">{recommendations.length}</span>
               </div>

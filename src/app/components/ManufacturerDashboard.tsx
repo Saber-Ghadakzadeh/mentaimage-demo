@@ -13,6 +13,7 @@ import {
 } from "recharts";
 import { downloadCsv, useNDMAPS } from "../data/NDMAPSData";
 import { ImageWithFallback } from "./figma/ImageWithFallback";
+import { InfoButton, MFR_INFO } from "./InfoPopup";
 import officialLogo from "../../imports/2.png";
 
 type View = "overview" | "outcomes" | "cases" | "network" | "strategy" | "monai";
@@ -63,13 +64,16 @@ function CompletionTooltip({ active, payload, week }: any) {
   return <div className="max-w-[280px] border border-white/10 bg-[#0B2D3B] p-3 text-xs text-white shadow-2xl"><p className="font-bold text-[#D9F06F]">{row.name} · {row.brand}</p><p className="mt-2 text-white/75">{row.Completed} of {row.Eligible} eligible patients completed their week-{week} check-in ({row["Completion %"]}%).</p></div>;
 }
 
-function Kpi({ label, value, note, trend = "up", icon: Icon, onClick, active }: { label: string; value: string | number; note: string; trend?: "up" | "down" | "neutral"; icon: any; onClick?: () => void; active?: boolean }) {
+function Kpi({ label, value, note, trend = "up", icon: Icon, onClick, active, info }: { label: string; value: string | number; note: string; trend?: "up" | "down" | "neutral"; icon: any; onClick?: () => void; active?: boolean; info?: Parameters<typeof InfoButton>[0]["info"] }) {
   const borderCls = active ? "border-2 border-[#19A7A2] bg-[#EAF6F4]" : "hover:border-[#19A7A2]/30";
   return (
     <Panel className={"group min-w-0 p-4 transition hover:-translate-y-0.5 sm:p-5 " + borderCls + (onClick ? " cursor-pointer" : "")} onClick={onClick}>
       <div className="flex items-start justify-between gap-2">
         <p className="max-w-[150px] text-[10px] font-bold uppercase leading-4 tracking-[0.12em] text-[#6B7F86]">{label}</p>
-        <span className={"grid size-8 shrink-0 place-items-center " + (active ? "bg-[#19A7A2] text-white" : "bg-[#EAF5F1] text-[#168D88]")}><Icon className="size-4" /></span>
+        <div className="flex items-center gap-1 shrink-0">
+          {info && <InfoButton info={info} />}
+          <span className={"grid size-8 place-items-center " + (active ? "bg-[#19A7A2] text-white" : "bg-[#EAF5F1] text-[#168D88]")}><Icon className="size-4" /></span>
+        </div>
       </div>
       <p className="mt-4 font-display text-3xl font-semibold leading-none tracking-tight text-[#123F52]">{value}</p>
       <p className={"mt-3 flex items-center gap-1 text-[11px] font-semibold " + (trend === "down" ? "text-[#B45C51]" : trend === "neutral" ? "text-[#6B7F86]" : "text-[#17877F]")}>
@@ -342,16 +346,16 @@ function Overview({ cases, checkins, orders, activeProducts, completion, complet
   return (
     <div className="space-y-5">
       <div className="grid grid-cols-2 gap-3 lg:grid-cols-5">
-        <Kpi label="Participating practitioners" value={practitioners} note="12 in network" icon={Users} onClick={() => toggleDrill("practitioners")} active={drill === "practitioners"} />
-        <Kpi label="Enrolled / monitored" value={`${cases.length} / 135`} note="Permissioned research view" trend="neutral" icon={ShieldCheck} onClick={() => toggleDrill("enrolled")} active={drill === "enrolled"} />
-        <Kpi label="Active products" value={activeProducts} note={`${discontinued} discontinuations`} trend={discontinued ? "down" : "neutral"} icon={Package} onClick={() => toggleDrill("products")} active={drill === "products"} />
-        <Kpi label={`Week-${period} patient check-ins`} value={completion} note="Completed / all eligible cases" icon={CheckCircle2} onClick={() => toggleDrill("checkins")} active={drill === "checkins"} />
-        <Kpi label="Reviewed patient reports" value={completedReports} note="Clinician-reviewed longitudinal records" icon={FileText} onClick={() => toggleDrill("reports")} active={drill === "reports"} />
-        <Kpi label="Practitioner engagement" value={retention} note="Ordered in period" icon={TrendingUp} onClick={() => toggleDrill("engagement")} active={drill === "engagement"} />
-        <Kpi label="Direct manufacturer orders" value={orders.length} note="Across linked accounts" icon={ShoppingCart} onClick={() => toggleDrill("orders")} active={drill === "orders"} />
-        <Kpi label="Total order value" value={money(totalOrders)} note="Fictional wholesale CAD" icon={CircleDollarSign} onClick={() => toggleDrill("revenue")} active={drill === "revenue"} />
-        <Kpi label="Purchasing frequency" value={`${(orders.length / Math.max(practitioners, 1)).toFixed(1)}x`} note="Orders per active ND" icon={BarChart3} onClick={() => toggleDrill("frequency")} active={drill === "frequency"} />
-        <Kpi label="Administration changes" value={changed} note={`${adverse} possible AE reports`} trend={adverse ? "down" : "neutral"} icon={TriangleAlert} onClick={() => toggleDrill("safety")} active={drill === "safety"} />
+        <Kpi label="Participating practitioners" value={practitioners} note="12 in network" icon={Users} onClick={() => toggleDrill("practitioners")} active={drill === "practitioners"} info={MFR_INFO.practitioners} />
+        <Kpi label="Enrolled / monitored" value={`${cases.length} / 135`} note="Permissioned research view" trend="neutral" icon={ShieldCheck} onClick={() => toggleDrill("enrolled")} active={drill === "enrolled"} info={MFR_INFO.enrolled} />
+        <Kpi label="Active products" value={activeProducts} note={`${discontinued} discontinuations`} trend={discontinued ? "down" : "neutral"} icon={Package} onClick={() => toggleDrill("products")} active={drill === "products"} info={MFR_INFO.products} />
+        <Kpi label={`Week-${period} patient check-ins`} value={completion} note="Completed / all eligible cases" icon={CheckCircle2} onClick={() => toggleDrill("checkins")} active={drill === "checkins"} info={MFR_INFO.checkins} />
+        <Kpi label="Reviewed patient reports" value={completedReports} note="Clinician-reviewed longitudinal records" icon={FileText} onClick={() => toggleDrill("reports")} active={drill === "reports"} info={MFR_INFO.reports} />
+        <Kpi label="Practitioner engagement" value={retention} note="Ordered in period" icon={TrendingUp} onClick={() => toggleDrill("engagement")} active={drill === "engagement"} info={MFR_INFO.engagement} />
+        <Kpi label="Direct manufacturer orders" value={orders.length} note="Across linked accounts" icon={ShoppingCart} onClick={() => toggleDrill("orders")} active={drill === "orders"} info={MFR_INFO.orders} />
+        <Kpi label="Total order value" value={money(totalOrders)} note="Fictional wholesale CAD" icon={CircleDollarSign} onClick={() => toggleDrill("revenue")} active={drill === "revenue"} info={MFR_INFO.revenue} />
+        <Kpi label="Purchasing frequency" value={`${(orders.length / Math.max(practitioners, 1)).toFixed(1)}x`} note="Orders per active ND" icon={BarChart3} onClick={() => toggleDrill("frequency")} active={drill === "frequency"} info={MFR_INFO.frequency} />
+        <Kpi label="Administration changes" value={changed} note={`${adverse} possible AE reports`} trend={adverse ? "down" : "neutral"} icon={TriangleAlert} onClick={() => toggleDrill("safety")} active={drill === "safety"} info={MFR_INFO.safety} />
       </div>
 
       {drill === "practitioners" && (
@@ -486,7 +490,7 @@ function Overview({ cases, checkins, orders, activeProducts, completion, complet
         </Panel>
       </div>
       <Panel className="p-5">
-        <ChartTitle eyebrow="Patient check-in completion" title={`Week-${period} check-in completion by product`} note="Completed check-ins / all eligible monitored cases" />
+        <ChartTitle eyebrow="Patient check-in completion" title={`Week-${period} check-in completion by product`} note="Completed check-ins / all eligible monitored cases" info={MFR_INFO.checkInCompletion} />
         <div className="mt-4 h-[340px]"><ResponsiveContainer width="100%" height="100%"><BarChart data={productUse} layout="vertical" margin={{ left: 36, right: 28 }}><CartesianGrid key="overview-completion-grid" stroke="#E6ECE8" horizontal={false} /><XAxis key="overview-completion-x" type="number" domain={[0,100]} unit="%" tick={{ fontSize: 10 }} axisLine={false} /><YAxis key="overview-completion-y" dataKey="name" type="category" width={90} tick={{ fontSize: 10 }} axisLine={false} tickLine={false} /><Tooltip key="overview-completion-tooltip" content={<CompletionTooltip week={period} />} /><Bar key="overview-completion-bar" dataKey="Completion %" fill="#A8C943" radius={[0,3,3,0]} /></BarChart></ResponsiveContainer></div>
         <div className="mt-2 flex flex-wrap gap-x-5 gap-y-1 text-[10px] text-[#647A81]">{productUse.map((item: AnyRecord) => <span key={item.productId}><b>{item.name}</b> {item.Completed}/{item.Eligible} ({item["Completion %"]}%)</span>)}</div>
       </Panel>
@@ -515,8 +519,8 @@ function Overview({ cases, checkins, orders, activeProducts, completion, complet
 }
 
 
-function ChartTitle({ eyebrow, title, note }: { eyebrow: string; title: string; note: string }) {
-  return <div><p className="text-[9px] font-bold uppercase tracking-[0.16em] text-[#17918B]">{eyebrow}</p><div className="mt-1 flex items-end justify-between gap-4"><h2 className="font-display text-xl font-semibold text-[#123F52]">{title}</h2><p className="hidden text-[10px] text-[#78898E] sm:block">{note}</p></div></div>;
+function ChartTitle({ eyebrow, title, note, info }: { eyebrow: string; title: string; note: string; info?: Parameters<typeof InfoButton>[0]["info"] }) {
+  return <div><p className="text-[9px] font-bold uppercase tracking-[0.16em] text-[#17918B]">{eyebrow}</p><div className="mt-1 flex items-start justify-between gap-4"><div className="flex items-center gap-2"><h2 className="font-display text-xl font-semibold text-[#123F52]">{title}</h2>{info && <InfoButton info={info} />}</div><p className="hidden text-[10px] text-[#78898E] sm:block">{note}</p></div></div>;
 }
 
 function Outcomes({ cases, checkins, trajectory, productUse, outcomeMix, products, onCases }: AnyRecord) {
@@ -533,12 +537,12 @@ function Outcomes({ cases, checkins, trajectory, productUse, outcomeMix, product
     <div className="space-y-5">
       <Panel className="flex flex-wrap items-center justify-between gap-3 p-4"><div><p className="text-[9px] font-bold uppercase tracking-wider text-[#17918B]">Patient-reported outcome domain</p><p className="mt-1 text-[10px] text-[#71858B]">{cases.length} eligible cases · missing values excluded</p></div><div className="flex bg-[#F1F5F2] p-1">{(["Sleep","Anxiety","Energy","All"] as const).map((item)=><button key={item} onClick={()=>setDomain(item)} className={`px-4 py-2 text-xs font-bold ${domain===item?"bg-[#123F52] text-white":"text-[#61777E]"}`}>{item}</button>)}</div></Panel>
       <div className="grid gap-5 xl:grid-cols-[1.25fr_.75fr]">
-        <Panel className="p-5"><ChartTitle eyebrow="Clinical intelligence" title="Baseline vs subsequent measurement" note="Active filters applied" /><div className="mt-4 h-[310px]"><ResponsiveContainer width="100%" height="100%"><BarChart data={domains}><CartesianGrid key="outcomes-baseline-grid" stroke="#E6ECE8" vertical={false} /><XAxis key="outcomes-baseline-x" dataKey="domain" axisLine={false} /><YAxis key="outcomes-baseline-y" domain={[0, 10]} axisLine={false} /><Tooltip key="outcomes-baseline-tooltip" content={<ChartTooltip />} /><Legend key="outcomes-baseline-legend" /><Bar key="outcomes-baseline-bar" dataKey="Baseline" fill="#153F50" /><Bar key="outcomes-followup-bar" dataKey="FollowUp" fill="#24A9A3" /></BarChart></ResponsiveContainer></div><p className="text-[10px] text-[#78898E]">Descriptive averages among available records; anxiety uses a severity scale where lower is better.</p></Panel>
-        <Panel className="p-5"><ChartTitle eyebrow="Practitioner-recorded result" title="Outcome disposition" note={`${cases.length} cases`} /><div className="mt-4 h-[260px]"><ResponsiveContainer width="100%" height="100%"><PieChart><Pie key="outcomes-disposition-pie" data={outcomeMix} dataKey="value" nameKey="name" innerRadius={62} outerRadius={95} paddingAngle={2} /><Tooltip key="outcomes-disposition-tooltip" content={<ChartTooltip />} /><Legend key="outcomes-disposition-legend" wrapperStyle={{ fontSize: 10 }} /></PieChart></ResponsiveContainer></div></Panel>
+        <Panel className="p-5"><ChartTitle eyebrow="Clinical intelligence" title="Baseline vs subsequent measurement" note="Active filters applied" info={MFR_INFO.baselineVsLatest} /><div className="mt-4 h-[310px]"><ResponsiveContainer width="100%" height="100%"><BarChart data={domains}><CartesianGrid key="outcomes-baseline-grid" stroke="#E6ECE8" vertical={false} /><XAxis key="outcomes-baseline-x" dataKey="domain" axisLine={false} /><YAxis key="outcomes-baseline-y" domain={[0, 10]} axisLine={false} /><Tooltip key="outcomes-baseline-tooltip" content={<ChartTooltip />} /><Legend key="outcomes-baseline-legend" /><Bar key="outcomes-baseline-bar" dataKey="Baseline" fill="#153F50" /><Bar key="outcomes-followup-bar" dataKey="FollowUp" fill="#24A9A3" /></BarChart></ResponsiveContainer></div><p className="text-[10px] text-[#78898E]">Descriptive averages among available records; anxiety uses a severity scale where lower is better.</p></Panel>
+        <Panel className="p-5"><ChartTitle eyebrow="Practitioner-recorded result" title="Outcome disposition" note={`${cases.length} cases`} info={MFR_INFO.disposition} /><div className="mt-4 h-[260px]"><ResponsiveContainer width="100%" height="100%"><PieChart><Pie key="outcomes-disposition-pie" data={outcomeMix} dataKey="value" nameKey="name" innerRadius={62} outerRadius={95} paddingAngle={2} /><Tooltip key="outcomes-disposition-tooltip" content={<ChartTooltip />} /><Legend key="outcomes-disposition-legend" wrapperStyle={{ fontSize: 10 }} /></PieChart></ResponsiveContainer></div></Panel>
       </div>
       <div className="grid gap-5 lg:grid-cols-3">
         <Panel className="p-5 lg:col-span-2">
-          <ChartTitle eyebrow="Magnitude of effect" title={`${domain==="All"?"All domains":domain} — baseline to latest check-in`} note="Mean change · patient-reported 0–10 scale" />
+          <ChartTitle eyebrow="Magnitude of effect" title={`${domain==="All"?"All domains":domain} — baseline to latest check-in`} note="Mean change · patient-reported 0–10 scale" info={MFR_INFO.magnitude} />
           <div className="mt-4 grid gap-3 sm:grid-cols-3">
             {domains.map((d) => {
               const show = domain === "All" || domain === d.domain;
@@ -685,7 +689,7 @@ function Strategy({ productUse, provinceData, checkins, cases }: AnyRecord) {
     ["Data gap", "Publication readiness", "Objective markers and concurrent-treatment fields are unevenly complete. A prospective observational protocol could address missingness.", "violet"],
     ["Hypothesis", "Regional acquisition", `${provinceData.sort((a: AnyRecord, b: AnyRecord) => b.Revenue - a.Revenue)[0]?.province || "Leading regions"} shows strong linked activity; compare practitioner density before prioritizing acquisition.`, "lime"],
   ];
-  return <div className="space-y-5"><div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">{cards.map(([type, title, text, tone]) => <Insight key={title} type={type} title={title} text={text} tone={tone} />)}</div><div className="grid gap-5 xl:grid-cols-[1fr_.8fr]"><Panel className="p-5"><ChartTitle eyebrow="Research opportunity map" title="Check-in completion and case volume by product" note="Hypothesis-generating only — not an efficacy measure" /><div className="mt-4 h-[300px]"><ResponsiveContainer width="100%" height="100%"><BarChart data={productUse}><CartesianGrid key="strategy-product-grid" stroke="#E6ECE8" vertical={false} /><XAxis key="strategy-product-x" dataKey="name" tick={{ fontSize: 9 }} axisLine={false} /><YAxis key="strategy-product-y" axisLine={false} /><Tooltip key="strategy-product-tooltip" content={<ChartTooltip />} /><Bar key="strategy-product-followup" dataKey="Completion %" fill="#24A9A3" /><Bar key="strategy-product-cases" dataKey="Cases" fill="#153F50" /></BarChart></ResponsiveContainer></div></Panel><div className="border border-[#173f50]/10 bg-[#0D3444] p-6 text-white shadow-[0_1px_2px_rgba(10,39,52,.03),0_14px_36px_rgba(10,39,52,.045)]"><Sparkles className="size-6 text-[#D9F06F]" /><p className="mt-5 text-[9px] font-bold uppercase tracking-wider text-[#8CE1DA]">Study concept · hypothesis</p><h2 className="mt-2 font-display text-3xl font-semibold">Administration timing and completion</h2><p className="mt-3 text-xs leading-relaxed text-white/55">Prospectively examine whether clearer timing instructions are associated with follow-up completion and reported adherence. Pre-specify outcomes and account for practitioner, baseline differences and concurrent treatment.</p><div className="mt-5 border-t border-white/10 pt-4 text-[10px] text-white/45"><b className="text-white/75">Status:</b> concept only · not a verified finding</div></div></div></div>;
+  return <div className="space-y-5"><div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">{cards.map(([type, title, text, tone]) => <Insight key={title} type={type} title={title} text={text} tone={tone} />)}</div><div className="grid gap-5 xl:grid-cols-[1fr_.8fr]"><Panel className="p-5"><ChartTitle eyebrow="Research opportunity map" title="Check-in completion and case volume by product" note="Hypothesis-generating only — not an efficacy measure" info={MFR_INFO.strategyChart} /><div className="mt-4 h-[300px]"><ResponsiveContainer width="100%" height="100%"><BarChart data={productUse}><CartesianGrid key="strategy-product-grid" stroke="#E6ECE8" vertical={false} /><XAxis key="strategy-product-x" dataKey="name" tick={{ fontSize: 9 }} axisLine={false} /><YAxis key="strategy-product-y" axisLine={false} /><Tooltip key="strategy-product-tooltip" content={<ChartTooltip />} /><Bar key="strategy-product-followup" dataKey="Completion %" fill="#24A9A3" /><Bar key="strategy-product-cases" dataKey="Cases" fill="#153F50" /></BarChart></ResponsiveContainer></div></Panel><div className="border border-[#173f50]/10 bg-[#0D3444] p-6 text-white shadow-[0_1px_2px_rgba(10,39,52,.03),0_14px_36px_rgba(10,39,52,.045)]"><div className="flex items-start justify-between"><Sparkles className="size-6 text-[#D9F06F]" /><InfoButton info={MFR_INFO.studyConcept} dark /></div><p className="mt-5 text-[9px] font-bold uppercase tracking-wider text-[#8CE1DA]">Study concept · hypothesis</p><h2 className="mt-2 font-display text-3xl font-semibold">Administration timing and completion</h2><p className="mt-3 text-xs leading-relaxed text-white/55">Prospectively examine whether clearer timing instructions are associated with check-in completion and reported adherence. Pre-specify outcomes and account for practitioner, baseline differences and concurrent treatment.</p><div className="mt-5 border-t border-white/10 pt-4 text-[10px] text-white/45"><b className="text-white/75">Status:</b> concept only · not a verified finding</div></div></div></div>;
 }
 
 function Insight({ type, title, text, tone }: { type: string; title: string; text: string; tone: string }) {
