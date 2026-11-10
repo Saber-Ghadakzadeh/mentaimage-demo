@@ -111,7 +111,8 @@ export function InfoButton({ info, dark = false }: { info: InfoContent; dark?: b
           </div>
           <div className="mt-3 h-px bg-[#E5EDEA]" />
           <p className="mt-2 text-[9px] text-[#9BABB0]">PulseKey™ insight guide · illustrative data only</p>
-        </div>
+        </div>,
+        document.body
       )}
     </>
   );
