@@ -248,10 +248,10 @@ export function ManufacturerDashboard({ onPatient, onPractitioner }: { onPatient
                 <SelectFilter label="Practitioner" value={practitioner} onChange={setPractitioner} options={[["all", "All practitioners"], ...practitioners.map((item) => [item.id, item.name])]} />
                 <SelectFilter label="Concern" value={concern} onChange={setConcern} options={[["all", "All monitored domains"], ["Sleep", "Sleep"], ["Anxiety", "Anxiety"]]} />
                 <SelectFilter label="Age band" value={ageBand} onChange={setAgeBand} options={[["all", "All ages"], ["18-34", "18–34"], ["35-54", "35–54"], ["55+", "55+"]]} />
-                <SelectFilter label="Follow-up week" value={period} onChange={setPeriod} options={[["4", "Week 4"], ["6", "Week 6"], ["8", "Week 8"]]} />
+                <SelectFilter label="Check-in week" value={period} onChange={setPeriod} options={[["4", "Week 4"], ["6", "Week 6"], ["8", "Week 8"]]} />
                 {filtersActive && <button onClick={resetFilters} className="h-10 px-3 text-xs font-bold text-[#9B5149] hover:bg-[#FFF0ED]"><X className="mr-1 inline size-3.5" /> Clear all filters</button>}
               </div>
-              {filtersActive && <div className="mt-3 flex flex-wrap gap-2">{[product !== "all" && `Product: ${products.find((item) => item.productId === product)?.name}`, province !== "all" && `Region: ${province}`, practitioner !== "all" && `Practitioner: ${practitioners.find((item) => item.id === practitioner)?.name}`, concern !== "all" && `Concern: ${concern}`, ageBand !== "all" && `Age: ${ageBand}`, `Follow-up: week ${period}`].filter(Boolean).map((label) => <span key={String(label)} className="bg-[#EAF5F1] px-2.5 py-1 text-[10px] font-bold text-[#147F79]">{label}</span>)}</div>}
+              {filtersActive && <div className="mt-3 flex flex-wrap gap-2">{[product !== "all" && `Product: ${products.find((item) => item.productId === product)?.name}`, province !== "all" && `Region: ${province}`, practitioner !== "all" && `Practitioner: ${practitioners.find((item) => item.id === practitioner)?.name}`, concern !== "all" && `Concern: ${concern}`, ageBand !== "all" && `Age: ${ageBand}`, `Check-in: week ${period}`].filter(Boolean).map((label) => <span key={String(label)} className="bg-[#EAF5F1] px-2.5 py-1 text-[10px] font-bold text-[#147F79]">{label}</span>)}</div>}
               <div className="mt-3 flex items-center justify-between border-t border-[#123F52]/8 pt-3 text-[10px] text-[#70848A]">
                 <span><b className="text-[#123F52]">{cases.length}</b> eligible monitored cases · <b>{authorizedCases.length}</b> authorized case records · {checkins.length} observations</span>
                 <span className="hidden sm:inline">All charts and exports reflect these filters</span>
@@ -357,7 +357,7 @@ function Overview({ cases, checkins, orders, activeProducts, completion, complet
       {drill === "practitioners" && (
         <Panel className="p-5">
           <ChartTitle eyebrow="Drill-down · practitioners" title="Activity by practitioner" note="Cases, check-ins, and orders" />
-          <div className="mt-4 overflow-x-auto"><table className="w-full min-w-[500px] text-left text-xs"><thead><tr className="border-b text-[9px] uppercase tracking-wider text-[#72858A]"><th className="py-3">Practitioner ID</th><th>Monitored cases</th><th>Follow-up check-ins</th><th>Direct orders</th></tr></thead><tbody>{practitionerActivity.slice(0,8).map((row: AnyRecord) => <tr key={row.id} className="border-b border-[#123F52]/7"><td className="py-3 font-bold text-[#123F52]">{row.id}</td><td>{row.cases}</td><td><span className="bg-[#E7F5EF] px-2 py-0.5 font-bold text-[#16857F]">{row.checkins}</span></td><td>{row.orders}</td></tr>)}</tbody></table></div>
+          <div className="mt-4 overflow-x-auto"><table className="w-full min-w-[500px] text-left text-xs"><thead><tr className="border-b text-[9px] uppercase tracking-wider text-[#72858A]"><th className="py-3">Practitioner ID</th><th>Monitored cases</th><th>Patient check-ins</th><th>Direct orders</th></tr></thead><tbody>{practitionerActivity.slice(0,8).map((row: AnyRecord) => <tr key={row.id} className="border-b border-[#123F52]/7"><td className="py-3 font-bold text-[#123F52]">{row.id}</td><td>{row.cases}</td><td><span className="bg-[#E7F5EF] px-2 py-0.5 font-bold text-[#16857F]">{row.checkins}</span></td><td>{row.orders}</td></tr>)}</tbody></table></div>
           <p className="mt-3 text-[10px] text-[#71858B]">Check-in volume reflects patient engagement with each practitioner's monitoring program. Practitioners with 0 orders may be in the clinical-only track.</p>
         </Panel>
       )}
@@ -372,7 +372,7 @@ function Overview({ cases, checkins, orders, activeProducts, completion, complet
 
       {drill === "products" && (
         <Panel className="p-5">
-          <ChartTitle eyebrow="Drill-down · active products" title="Monitored cases and follow-up completion by product" note="Primary product exposure only" />
+          <ChartTitle eyebrow="Drill-down · active products" title="Monitored cases and patient check-in completion by product" note="Primary product exposure only" />
           <div className="mt-4 h-[240px]"><ResponsiveContainer width="100%" height="100%"><BarChart data={productUse} layout="vertical" margin={{ left: 20 }}><CartesianGrid stroke="#E6ECE8" horizontal={false} /><XAxis type="number" tick={{ fontSize: 10 }} axisLine={false} /><YAxis dataKey="name" type="category" width={90} tick={{ fontSize: 10 }} axisLine={false} tickLine={false} /><Tooltip content={<ChartTooltip />} /><Bar dataKey="Cases" name="Monitored cases" fill="#153F50" radius={[0,2,2,0]} /><Bar dataKey="Completed" name="Completed follow-up" fill="#24A9A3" radius={[0,2,2,0]} /></BarChart></ResponsiveContainer></div>
           {discontinued > 0 && <div className="mt-3 bg-[#FFF2EF] p-3 text-xs text-[#9A4C42]"><b>{discontinued} discontinuation{discontinued > 1 ? "s" : ""} recorded.</b> Review individual cases in Patient Outcome Intelligence for context.</div>}
         </Panel>
@@ -393,7 +393,7 @@ function Overview({ cases, checkins, orders, activeProducts, completion, complet
             {[
               { label: "Reports generated — prior 3 years", value: "28", sub: "5-6 NDs, manual and unstructured", tone: "rose" },
               { label: "Structured records — this program", value: String(completedReports), sub: "Longitudinal, permissioned, exportable", tone: "teal" },
-              { label: "Avg. follow-up observations per case", value: (checkins.length && cases.length) ? (checkins.length / cases.length).toFixed(1) : "n/a", sub: "Patient check-ins per enrolled case", tone: "navy" },
+              { label: "Avg. check-in observations per case", value: (checkins.length && cases.length) ? (checkins.length / cases.length).toFixed(1) : "n/a", sub: "Patient check-ins per enrolled case", tone: "navy" },
             ].map(({ label, value, sub, tone }) => {
               const bg = tone === "rose" ? "bg-[#FFF2EF]" : tone === "teal" ? "bg-[#EAF5F1]" : "bg-[#EAF1F4]";
               const col = tone === "rose" ? "text-[#9A4C42]" : tone === "teal" ? "text-[#147F79]" : "text-[#123F52]";
@@ -458,7 +458,7 @@ function Overview({ cases, checkins, orders, activeProducts, completion, complet
 
       <Panel className="grid gap-px overflow-hidden bg-[#123F52]/8 sm:grid-cols-3">
         <div className="bg-white p-4"><p className="text-[9px] font-bold uppercase tracking-wider text-[#17918B]">Patient check-in completion</p><p className="mt-2 text-sm font-bold text-[#123F52]">{completion}</p><p className="mt-1 text-[10px] text-[#71858B]">Scheduled week-{period} check-in completed / all eligible cases.</p></div>
-        <div className="bg-white p-4"><p className="text-[9px] font-bold uppercase tracking-wider text-[#17918B]">Clinical follow-up completion</p><p className="mt-2 text-sm font-bold text-[#123F52]">Not available</p><p className="mt-1 text-[10px] text-[#71858B]">The seed does not include a complete assessment schedule denominator.</p></div>
+        <div className="bg-white p-4"><p className="text-[9px] font-bold uppercase tracking-wider text-[#17918B]">Lab result uploads</p><p className="mt-2 text-sm font-bold text-[#123F52]">Patient-uploaded</p><p className="mt-1 text-[10px] text-[#71858B]">Patients may voluntarily upload lab values; shown in individual case chronology when consented.</p></div>
         <div className="bg-white p-4"><p className="text-[9px] font-bold uppercase tracking-wider text-[#17918B]">Longitudinal reporting</p><p className="mt-2 text-sm font-bold text-[#123F52]">{completedReports} structured records</p><p className="mt-1 text-[10px] text-[#71858B]">Clinician-reviewed longitudinal case records with patient consent.</p></div>
       </Panel>
       <div className="grid gap-5 xl:grid-cols-[1.45fr_.85fr]">
@@ -486,7 +486,7 @@ function Overview({ cases, checkins, orders, activeProducts, completion, complet
         </Panel>
       </div>
       <Panel className="p-5">
-        <ChartTitle eyebrow="Scheduled patient follow-up" title={`Week-${period} patient check-in completion by product`} note="Completed check-ins / all eligible monitored cases" />
+        <ChartTitle eyebrow="Patient check-in completion" title={`Week-${period} check-in completion by product`} note="Completed check-ins / all eligible monitored cases" />
         <div className="mt-4 h-[340px]"><ResponsiveContainer width="100%" height="100%"><BarChart data={productUse} layout="vertical" margin={{ left: 36, right: 28 }}><CartesianGrid key="overview-completion-grid" stroke="#E6ECE8" horizontal={false} /><XAxis key="overview-completion-x" type="number" domain={[0,100]} unit="%" tick={{ fontSize: 10 }} axisLine={false} /><YAxis key="overview-completion-y" dataKey="name" type="category" width={90} tick={{ fontSize: 10 }} axisLine={false} tickLine={false} /><Tooltip key="overview-completion-tooltip" content={<CompletionTooltip week={period} />} /><Bar key="overview-completion-bar" dataKey="Completion %" fill="#A8C943" radius={[0,3,3,0]} /></BarChart></ResponsiveContainer></div>
         <div className="mt-2 flex flex-wrap gap-x-5 gap-y-1 text-[10px] text-[#647A81]">{productUse.map((item: AnyRecord) => <span key={item.productId}><b>{item.name}</b> {item.Completed}/{item.Eligible} ({item["Completion %"]}%)</span>)}</div>
       </Panel>
@@ -537,12 +537,38 @@ function Outcomes({ cases, checkins, trajectory, productUse, outcomeMix, product
         <Panel className="p-5"><ChartTitle eyebrow="Practitioner-recorded result" title="Outcome disposition" note={`${cases.length} cases`} /><div className="mt-4 h-[260px]"><ResponsiveContainer width="100%" height="100%"><PieChart><Pie key="outcomes-disposition-pie" data={outcomeMix} dataKey="value" nameKey="name" innerRadius={62} outerRadius={95} paddingAngle={2} /><Tooltip key="outcomes-disposition-tooltip" content={<ChartTooltip />} /><Legend key="outcomes-disposition-legend" wrapperStyle={{ fontSize: 10 }} /></PieChart></ResponsiveContainer></div></Panel>
       </div>
       <div className="grid gap-5 lg:grid-cols-3">
-        <Panel className="p-5 lg:col-span-2"><ChartTitle eyebrow="Time course" title={`${domain==="All"?"Available domains":domain} over time`} note="Mean among available observations" /><div className="mt-4 h-[280px]"><ResponsiveContainer width="100%" height="100%"><LineChart data={trajectory}><CartesianGrid key="outcomes-time-grid" stroke="#E6ECE8" vertical={false} /><XAxis key="outcomes-time-x" dataKey="week" axisLine={false} /><YAxis key="outcomes-time-y" domain={[0,10]} axisLine={false} /><Tooltip key="outcomes-time-tooltip" content={<ChartTooltip />} /><Legend key="outcomes-time-legend" />{(domain==="All"||domain==="Sleep")&&<Line key="outcomes-time-sleep" dataKey="Sleep" stroke="#159D97" strokeWidth={3} />}{(domain==="All"||domain==="Anxiety")&&<Line key="outcomes-time-anxiety" dataKey="Anxiety" stroke="#8C78C4" strokeWidth={2} />}{(domain==="All"||domain==="Energy")&&<Line key="outcomes-time-energy" dataKey="Energy" stroke="#E5A64D" strokeWidth={2} />}</LineChart></ResponsiveContainer></div><div className="mt-3 flex justify-between text-[10px] text-[#71858B]"><span>Sleep & energy: higher is better. Anxiety severity: lower is better.</span><button onClick={onCases} className="font-bold text-[#168D88]">Open authorized cases →</button></div></Panel>
+        <Panel className="p-5 lg:col-span-2">
+          <ChartTitle eyebrow="Magnitude of effect" title={`${domain==="All"?"All domains":domain} — baseline to latest check-in`} note="Mean change · patient-reported 0–10 scale" />
+          <div className="mt-4 grid gap-3 sm:grid-cols-3">
+            {domains.map((d) => {
+              const show = domain === "All" || domain === d.domain;
+              if (!show) return null;
+              const delta = +(d.FollowUp - d.Baseline).toFixed(1);
+              const positive = d.domain === "Anxiety" ? delta < 0 : delta > 0;
+              const nBaseline = checkins.filter((item: AnyRecord) => item.week === 0 && typeof item[d.domain === "Sleep" ? "sleepQuality0to10" : d.domain === "Anxiety" ? "anxietySeverity0to10" : "energy0to10"] === "number").length;
+              const nLatest = checkins.filter((item: AnyRecord) => item.week >= 6 && typeof item[d.domain === "Sleep" ? "sleepQuality0to10" : d.domain === "Anxiety" ? "anxietySeverity0to10" : "energy0to10"] === "number").length;
+              return (
+                <div key={d.domain} className="bg-[#F7F9F6] p-4">
+                  <p className="text-[9px] font-bold uppercase tracking-wider text-[#71858B]">{d.domain}</p>
+                  <div className="mt-3 flex items-end gap-3">
+                    <div><p className="text-[10px] text-[#71858B]">Baseline</p><p className="font-display text-2xl font-semibold text-[#123F52]">{d.Baseline}<span className="text-sm">/10</span></p><p className="text-[9px] text-[#71858B]">{nBaseline} check-ins</p></div>
+                    <div className="mb-1 text-[#71858B]">→</div>
+                    <div><p className="text-[10px] text-[#71858B]">Latest</p><p className="font-display text-2xl font-semibold text-[#123F52]">{d.FollowUp}<span className="text-sm">/10</span></p><p className="text-[9px] text-[#71858B]">{nLatest} check-ins</p></div>
+                    <div className={`ml-auto rounded px-2 py-1 text-xs font-bold ${positive ? "bg-[#E7F5EF] text-[#147F79]" : "bg-[#FFF2EF] text-[#9A4C42]"}`}>{delta > 0 ? "+" : ""}{delta}</div>
+                  </div>
+                  {d.domain === "Anxiety" && <p className="mt-2 text-[9px] text-[#71858B]">Lower is better for anxiety severity</p>}
+                </div>
+              );
+            })}
+          </div>
+          <div className="mt-4 h-[200px]"><ResponsiveContainer width="100%" height="100%"><LineChart data={trajectory}><CartesianGrid key="outcomes-time-grid" stroke="#E6ECE8" vertical={false} /><XAxis key="outcomes-time-x" dataKey="week" axisLine={false} /><YAxis key="outcomes-time-y" domain={[0,10]} axisLine={false} /><Tooltip key="outcomes-time-tooltip" content={<ChartTooltip />} /><Legend key="outcomes-time-legend" />{(domain==="All"||domain==="Sleep")&&<Line key="outcomes-time-sleep" dataKey="Sleep" stroke="#159D97" strokeWidth={3} />}{(domain==="All"||domain==="Anxiety")&&<Line key="outcomes-time-anxiety" dataKey="Anxiety" stroke="#8C78C4" strokeWidth={2} />}{(domain==="All"||domain==="Energy")&&<Line key="outcomes-time-energy" dataKey="Energy" stroke="#E5A64D" strokeWidth={2} />}</LineChart></ResponsiveContainer></div>
+          <div className="mt-3 flex justify-between text-[10px] text-[#71858B]"><span>Sleep & energy: higher is better. Anxiety severity: lower is better. N reflects available observations only.</span><button onClick={onCases} className="font-bold text-[#168D88]">Open authorized cases →</button></div>
+        </Panel>
         <Panel className="p-5">
           <ChartTitle eyebrow="Administration & tolerability" title="Observed signals" note="Not causal attribution" />
           <div className="mt-5 space-y-3">
-            <Signal label="Reported dose / timing changes" value={changed} detail={`${percent(changed, checkins.length)} of follow-ups`} tone="amber" />
-            <Signal label="No new / worsened symptom entered" value={tolerant} detail={`${percent(tolerant, checkins.length)} of follow-ups`} tone="teal" />
+            <Signal label="Reported dose / timing changes" value={changed} detail={`${percent(changed, checkins.length)} of check-ins`} tone="amber" />
+            <Signal label="No new / worsened symptom entered" value={tolerant} detail={`${percent(tolerant, checkins.length)} of check-ins`} tone="teal" />
             <Signal label="Concurrent care documented" value={cases.filter((item: AnyRecord) => item.carePlan?.concurrentTreatments?.length || item.clinicianAssessment).length} detail="Review at case level" tone="navy" />
           </div>
         </Panel>
@@ -589,10 +615,10 @@ function CaseExplorer({ cases, checkins, products, seed }: AnyRecord) {
         </Panel>
         <div className="grid gap-5 2xl:grid-cols-[1fr_340px]">
           <Panel className="p-5">
-            <ChartTitle eyebrow="Longitudinal record" title="Chronology of care" note={`${rows.length} follow-ups available`} />
+            <ChartTitle eyebrow="Longitudinal record" title="Chronology of care" note={`${rows.length} patient check-ins available`} />
             <div className="mt-5 max-h-[620px] overflow-y-auto pr-2">
               <TimelineEntry date={item.baselineDate} title="Baseline & practitioner plan" text={`${product?.name}, ${item.carePlan.productSchedule}. Baseline sleep ${item.baseline?.sleepQuality0to10 ?? "—"}, anxiety ${item.baseline?.anxietySeverity0to10 ?? "—"}.`} type="plan" />
-              {rows.map((row: AnyRecord) => <TimelineEntry key={row.id} date={row.date} title={`Week ${row.week} patient follow-up`} text={`Sleep ${row.sleepQuality0to10 ?? "—"}/10 · anxiety ${row.anxietySeverity0to10 ?? "—"}/10 · energy ${row.energy0to10 ?? "—"}/10 · adherence ${row.planAdherence}.${row.reportedDoseChange ? ` Reported administration change: ${row.reportedDoseChange}.` : ""}${row.newOrWorsenedSymptoms ? ` Possible effect: ${row.newOrWorsenedSymptoms}.` : ""}`} type={row.newOrWorsenedSymptoms ? "alert" : "followup"} />)}
+              {rows.map((row: AnyRecord) => <TimelineEntry key={row.id} date={row.date} title={`Week ${row.week} patient check-in`} text={`Sleep ${row.sleepQuality0to10 ?? "—"}/10 · anxiety ${row.anxietySeverity0to10 ?? "—"}/10 · energy ${row.energy0to10 ?? "—"}/10 · adherence ${row.planAdherence}.${row.reportedDoseChange ? ` Reported administration change: ${row.reportedDoseChange}.` : ""}${row.newOrWorsenedSymptoms ? ` Possible effect: ${row.newOrWorsenedSymptoms}.` : ""}${row.labResults ? ` Lab: ${row.labResults}.` : ""}`} type={row.newOrWorsenedSymptoms ? "alert" : "followup"} />)}
               {events.map((event: AnyRecord) => <TimelineEntry key={event.id} date={event.date} title={event.type.replaceAll("_", " ")} text={`${event.note} ${event.clinicianResponse || ""}`} type="event" />)}
             </div>
           </Panel>
@@ -652,14 +678,14 @@ function Strategy({ productUse, provinceData, checkins, cases }: AnyRecord) {
   const timing = checkins.filter((item: AnyRecord) => item.reportedDoseChange).length;
   const possible = checkins.filter((item: AnyRecord) => item.newOrWorsenedSymptoms).length;
   const cards = [
-    ["Observation", "Administration friction", `${timing} follow-ups include a patient-reported timing or frequency change. Review wording and administration guidance by product.`, "amber"],
-    ["Observation", "Potential tolerability signals", `${possible} follow-ups contain a new or worsened symptom entry. These require human review and do not establish product attribution.`, "rose"],
+    ["Observation", "Administration friction", `${timing} check-ins include a patient-reported timing or frequency change. Review wording and administration guidance by product.`, "amber"],
+    ["Observation", "Potential tolerability signals", `${possible} check-ins contain a new or worsened symptom entry. These require human review and do not establish product attribution.`, "rose"],
     ["Hypothesis", "Packaging & instructions", "Cases with administration changes may help identify where timing instructions or packaging cues deserve qualitative testing.", "teal"],
     ["Opportunity", "Practitioner education", "Short clinical follow-up guides may improve consistency in adherence, concomitant-care and objective-marker documentation.", "navy"],
     ["Data gap", "Publication readiness", "Objective markers and concurrent-treatment fields are unevenly complete. A prospective observational protocol could address missingness.", "violet"],
     ["Hypothesis", "Regional acquisition", `${provinceData.sort((a: AnyRecord, b: AnyRecord) => b.Revenue - a.Revenue)[0]?.province || "Leading regions"} shows strong linked activity; compare practitioner density before prioritizing acquisition.`, "lime"],
   ];
-  return <div className="space-y-5"><div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">{cards.map(([type, title, text, tone]) => <Insight key={title} type={type} title={title} text={text} tone={tone} />)}</div><div className="grid gap-5 xl:grid-cols-[1fr_.8fr]"><Panel className="p-5"><ChartTitle eyebrow="Research opportunity map" title="Product follow-up and repeat signal" note="Hypothesis-generating only" /><div className="mt-4 h-[300px]"><ResponsiveContainer width="100%" height="100%"><BarChart data={productUse}><CartesianGrid key="strategy-product-grid" stroke="#E6ECE8" vertical={false} /><XAxis key="strategy-product-x" dataKey="name" tick={{ fontSize: 9 }} axisLine={false} /><YAxis key="strategy-product-y" axisLine={false} /><Tooltip key="strategy-product-tooltip" content={<ChartTooltip />} /><Bar key="strategy-product-followup" dataKey="Completion %" fill="#24A9A3" /><Bar key="strategy-product-cases" dataKey="Cases" fill="#153F50" /></BarChart></ResponsiveContainer></div></Panel><div className="border border-[#173f50]/10 bg-[#0D3444] p-6 text-white shadow-[0_1px_2px_rgba(10,39,52,.03),0_14px_36px_rgba(10,39,52,.045)]"><Sparkles className="size-6 text-[#D9F06F]" /><p className="mt-5 text-[9px] font-bold uppercase tracking-wider text-[#8CE1DA]">Study concept · hypothesis</p><h2 className="mt-2 font-display text-3xl font-semibold">Administration timing and completion</h2><p className="mt-3 text-xs leading-relaxed text-white/55">Prospectively examine whether clearer timing instructions are associated with follow-up completion and reported adherence. Pre-specify outcomes and account for practitioner, baseline differences and concurrent treatment.</p><div className="mt-5 border-t border-white/10 pt-4 text-[10px] text-white/45"><b className="text-white/75">Status:</b> concept only · not a verified finding</div></div></div></div>;
+  return <div className="space-y-5"><div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">{cards.map(([type, title, text, tone]) => <Insight key={title} type={type} title={title} text={text} tone={tone} />)}</div><div className="grid gap-5 xl:grid-cols-[1fr_.8fr]"><Panel className="p-5"><ChartTitle eyebrow="Research opportunity map" title="Check-in completion and case volume by product" note="Hypothesis-generating only — not an efficacy measure" /><div className="mt-4 h-[300px]"><ResponsiveContainer width="100%" height="100%"><BarChart data={productUse}><CartesianGrid key="strategy-product-grid" stroke="#E6ECE8" vertical={false} /><XAxis key="strategy-product-x" dataKey="name" tick={{ fontSize: 9 }} axisLine={false} /><YAxis key="strategy-product-y" axisLine={false} /><Tooltip key="strategy-product-tooltip" content={<ChartTooltip />} /><Bar key="strategy-product-followup" dataKey="Completion %" fill="#24A9A3" /><Bar key="strategy-product-cases" dataKey="Cases" fill="#153F50" /></BarChart></ResponsiveContainer></div></Panel><div className="border border-[#173f50]/10 bg-[#0D3444] p-6 text-white shadow-[0_1px_2px_rgba(10,39,52,.03),0_14px_36px_rgba(10,39,52,.045)]"><Sparkles className="size-6 text-[#D9F06F]" /><p className="mt-5 text-[9px] font-bold uppercase tracking-wider text-[#8CE1DA]">Study concept · hypothesis</p><h2 className="mt-2 font-display text-3xl font-semibold">Administration timing and completion</h2><p className="mt-3 text-xs leading-relaxed text-white/55">Prospectively examine whether clearer timing instructions are associated with follow-up completion and reported adherence. Pre-specify outcomes and account for practitioner, baseline differences and concurrent treatment.</p><div className="mt-5 border-t border-white/10 pt-4 text-[10px] text-white/45"><b className="text-white/75">Status:</b> concept only · not a verified finding</div></div></div></div>;
 }
 
 function Insight({ type, title, text, tone }: { type: string; title: string; text: string; tone: string }) {
@@ -706,7 +732,7 @@ function Monai({ cases, checkins, orders, products, practitioners, onCases, onEx
     }
     if (q.includes("executive summary")) {
       const revenue = orders.reduce((sum: number, item: AnyRecord) => sum + item.totalCAD, 0);
-      return { title: "Quarterly executive summary", text: `${cases.length} authorized cases contributed ${checkins.length} follow-up observations across ${new Set(cases.map((item: AnyRecord) => item.practitionerId)).size} practitioners. ${orders.length} direct orders totalled ${money(revenue)} in fictional wholesale value. Priority operational questions are follow-up completeness, administration changes and reporting consistency. No causal efficacy conclusion is supported.`, chart: [{ label: "Cases", value: cases.length }, { label: "Follow-ups", value: checkins.length }, { label: "Orders", value: orders.length }] };
+      return { title: "Quarterly executive summary", text: `${cases.length} authorized cases contributed ${checkins.length} check-in observations across ${new Set(cases.map((item: AnyRecord) => item.practitionerId)).size} practitioners. ${orders.length} direct orders totalled ${money(revenue)} in fictional wholesale value. Priority operational questions are check-in completeness, administration changes and reporting consistency. No causal efficacy conclusion is supported.`, chart: [{ label: "Cases", value: cases.length }, { label: "Follow-ups", value: checkins.length }, { label: "Orders", value: orders.length }] };
     }
     const adverse = checkins.filter((item: AnyRecord) => item.newOrWorsenedSymptoms).length;
     return { title: "Investigation priorities", text: `${adverse} follow-ups include a possible adverse-effect entry. Other priorities are product-level missingness, administration changes, concurrent treatments and variation between practices. These are hypotheses for human review, not verified findings.`, chart: [{ label: "Possible-effect entries", value: adverse }, { label: "Dose/timing changes", value: checkins.filter((item: AnyRecord) => item.reportedDoseChange).length }] };

@@ -1,5 +1,5 @@
 import { useMemo, useState } from "react";
-import { ArrowLeft, Check, ChevronRight, Clock3, MessageCircle, ShieldCheck } from "lucide-react";
+import { ArrowLeft, Check, ChevronRight, Clock3, FlaskConical, MessageCircle, ShieldCheck } from "lucide-react";
 import { type AssignedQuestion, useNDMAPS } from "../data/NDMAPSData";
 import { nextDueDate } from "./PractitionerMonitoring";
 
@@ -10,9 +10,13 @@ export function PatientCareCheckIn({ caseId = "C-1001", onBack, onComplete }: { 
   const questions = program?.questions.filter((question) => !question.paused) || [];
   const [step, setStep] = useState(0);
   const [answers, setAnswers] = useState<Record<string, string | number | string[]>>({});
+  const [labResults, setLabResults] = useState("");
+  const [showLab, setShowLab] = useState(false);
   const [done, setDone] = useState(false);
   const question = questions[step];
   const answer = question ? answers[question.id] : undefined;
+  const isLastQuestion = step === questions.length - 1;
+  const isLabStep = showLab && step === questions.length;
   const complete = () => {
     if (!program) return;
     data.addMonitoringResponses(questions.filter((item) => answers[item.id] !== undefined).map((item) => ({ caseId, programId: program.id, questionId: item.id, value: answers[item.id], reviewRequested: item.id === "dose-change" || item.id === "possible-effect" })));
@@ -20,20 +24,32 @@ export function PatientCareCheckIn({ caseId = "C-1001", onBack, onComplete }: { 
     const hours = Number(answers["sleep-hours"] ?? 7);
     const anxiety = Number(answers["anxiety-intensity"] ?? 5);
     const adherence = String(answers["adherence"] ?? "not asked").toLowerCase();
-    data.addMicroCheckin({ caseId, sleepQuality0to10: sleep, sleepHours: hours, anxietySeverity0to10: anxiety, planAdherence: adherence, concern: String(answers["practitioner-note"] ?? "") });
+    data.addMicroCheckin({ caseId, sleepQuality0to10: sleep, sleepHours: hours, anxietySeverity0to10: anxiety, planAdherence: adherence, concern: String(answers["practitioner-note"] ?? ""), labResults: labResults.trim() || undefined });
     setDone(true);
   };
   if (!program || !questions.length) return <MobileFrame><button onClick={onBack} className="flex items-center gap-2 text-sm font-bold text-white/70"><ArrowLeft className="size-4" /> Back</button><div className="mt-10 rounded-[28px] bg-white p-6 text-[#20343C]"><h1 className="font-display text-3xl font-semibold">Nothing is due right now.</h1><p className="mt-3 text-sm text-[#71858B]">Your practitioner has not assigned an active care check-in.</p></div></MobileFrame>;
   if (done) return <MobileFrame><div className="grid min-h-[75vh] place-items-center text-center"><div><span className="mx-auto grid size-16 place-items-center rounded-full bg-[#D9F06F] text-[#123F52]"><Check className="size-7" /></span><h1 className="font-display mt-5 text-4xl font-semibold">Check-in complete.</h1><p className="mt-3 text-sm text-white/60">Your answers were added to your progress and shared with your practitioner according to your permissions.</p><button onClick={onComplete} className="mt-7 rounded-xl bg-white px-5 py-3 text-sm font-bold text-[#123F52]">View my progress</button></div></div></MobileFrame>;
+  const totalSteps = questions.length + (showLab ? 1 : 0);
   return <MobileFrame>
-    <div className="flex items-center justify-between"><button onClick={step ? () => setStep(step-1) : onBack} className="flex items-center gap-2 text-sm font-bold text-white/70"><ArrowLeft className="size-4" /> Back</button><span className="text-[10px] font-bold uppercase tracking-wider text-[#D9F06F]">{step+1} of {questions.length}</span></div>
-    <div className="mt-5 flex gap-1">{questions.map((item,index)=><span key={item.id} className={`h-1 flex-1 rounded-full ${index<=step?"bg-[#D9F06F]":"bg-white/15"}`} />)}</div>
-    <div className="mt-7 rounded-[28px] border border-white/15 bg-white/10 p-5 backdrop-blur-xl">
+    <div className="flex items-center justify-between"><button onClick={isLabStep ? () => setStep(questions.length-1) : step ? () => setStep(step-1) : onBack} className="flex items-center gap-2 text-sm font-bold text-white/70"><ArrowLeft className="size-4" /> Back</button><span className="text-[10px] font-bold uppercase tracking-wider text-[#D9F06F]">{(isLabStep ? questions.length : step)+1} of {totalSteps}</span></div>
+    <div className="mt-5 flex gap-1">
+      {questions.map((item,index)=><span key={item.id} className={`h-1 flex-1 rounded-full ${index<=step&&!isLabStep?"bg-[#D9F06F]":isLabStep?"bg-[#D9F06F]":"bg-white/15"}`} />)}
+      {showLab && <span className={`h-1 flex-1 rounded-full ${isLabStep?"bg-[#D9F06F]":"bg-white/15"}`} />}
+    </div>
+    {!isLabStep && question && <div className="mt-7 rounded-[28px] border border-white/15 bg-white/10 p-5 backdrop-blur-xl">
       <div className="flex items-center justify-between"><p className="text-[10px] font-bold uppercase tracking-[.16em] text-[#A9E7E2]">{program.name}</p><span className="flex items-center gap-1 text-[10px] text-white/45"><Clock3 className="size-3" /> ~45 sec</span></div>
       <h1 className="font-display mt-4 text-3xl font-semibold leading-tight">{question.text}</h1>
       <AnswerInput question={question} value={answer} onChange={(value) => setAnswers((current) => ({ ...current, [question.id]: value }))} />
-      <button disabled={question.required && answer === undefined} onClick={() => step === questions.length-1 ? complete() : setStep(step+1)} className="mt-7 flex w-full items-center justify-center gap-2 rounded-xl bg-[#D9F06F] py-3.5 font-bold text-[#123F52] disabled:opacity-35">{step === questions.length-1 ? "Complete check-in" : "Continue"} <ChevronRight className="size-4" /></button>
-    </div>
+      <button disabled={question.required && answer === undefined} onClick={() => { if (isLastQuestion) { setShowLab(true); setStep(questions.length); } else { setStep(step+1); } }} className="mt-7 flex w-full items-center justify-center gap-2 rounded-xl bg-[#D9F06F] py-3.5 font-bold text-[#123F52] disabled:opacity-35">{isLastQuestion ? "Continue" : "Continue"} <ChevronRight className="size-4" /></button>
+    </div>}
+    {isLabStep && <div className="mt-7 rounded-[28px] border border-white/15 bg-white/10 p-5 backdrop-blur-xl">
+      <div className="flex items-center justify-between"><p className="text-[10px] font-bold uppercase tracking-[.16em] text-[#A9E7E2]">Optional</p><span className="flex items-center gap-1 text-[10px] text-white/45"><FlaskConical className="size-3" /> Lab results</span></div>
+      <h1 className="font-display mt-4 text-3xl font-semibold leading-tight">Any recent lab results to share?</h1>
+      <p className="mt-2 text-sm text-white/55">Entirely optional. You own this data. Enter values you'd like your practitioner to see — for example: Ferritin 42, Vitamin D 68, TSH 2.1.</p>
+      <textarea value={labResults} onChange={(e) => setLabResults(e.target.value)} placeholder="e.g. Ferritin 42 ng/mL, Vitamin D 68 nmol/L…" className="mt-5 min-h-28 w-full rounded-2xl bg-white p-4 text-sm text-[#20343C] outline-none" />
+      <button onClick={complete} className="mt-5 flex w-full items-center justify-center gap-2 rounded-xl bg-[#D9F06F] py-3.5 font-bold text-[#123F52]">Complete check-in <ChevronRight className="size-4" /></button>
+      <button onClick={complete} className="mt-3 w-full text-center text-xs text-white/45">Skip — complete without lab results</button>
+    </div>}
     <p className="mt-5 flex items-start gap-2 text-[10px] leading-relaxed text-white/45"><ShieldCheck className="mt-0.5 size-3.5 shrink-0" />These questions were assigned by your practitioner. PulseKey does not independently prescribe or approve treatment changes.</p>
   </MobileFrame>;
 }

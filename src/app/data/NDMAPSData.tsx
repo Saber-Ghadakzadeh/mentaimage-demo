@@ -9,7 +9,7 @@ const seed = {
 } as typeof rawSeed;
 
 export type DemoMessage = { id: string; caseId: string; senderRole: string; date: string; body: string; status: string; category?: string };
-export type MicroCheckin = { id: string; caseId: string; date: string; sleepQuality0to10: number; sleepHours: number; anxietySeverity0to10: number; planAdherence: string; concern: string };
+export type MicroCheckin = { id: string; caseId: string; date: string; sleepQuality0to10: number; sleepHours: number; anxietySeverity0to10: number; planAdherence: string; concern: string; labResults?: string };
 export type PlanUpdate = { id: string; caseId: string; date: string; summary: string; approvedBy: string };
 type DemoOrder = { id: string; practitionerId: string; date: string; status: "draft" | "submitted" | "received"; lines: Array<{ productId: string; qty: number; unitPriceCAD: number }>; totalCAD: number };
 export type MonitoringQuestion = {
